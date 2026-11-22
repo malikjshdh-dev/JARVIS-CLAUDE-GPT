@@ -1,1 +1,49 @@
 
+name: Build JARVIS APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK
+        run: |
+          chmod +x build_apk.sh
+          bash build_apk.sh
+
+      - name: Find generated APK
+        run: |
+          find . -type f -name "*.apk" -print
+          test -n "$(find . -type f -name "*.apk" -print -quit)" || {
+            echo "ERROR: APK tidak ditemukan."
+            exit 1
+          }
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-APK
+          path: '**/*.apk'
+          if-no-files-found: error
+          
