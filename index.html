@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="theme-color" content="#010712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root{--c:#00f0ff;--rgb:0,240,255;--cyan-bright:#b8fcff;--cyan-mid:#0088ff;--bg:#010712;--bgrgb:1,7,18;--txt:#e6fdff;--txt2:#bdfaff;--fs:16px;--dock-h:200px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+input,textarea,select{user-select:text}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:transparent;font-family:'Rajdhani',system-ui,sans-serif;color:var(--cyan-bright)}
+h2,.status-line,.hud-btn,#stat,.core-center-text{font-family:'Orbitron','Rajdhani',system-ui,sans-serif}
+.space-backdrop{position:fixed;inset:0;background:radial-gradient(circle at 50% 45%,rgba(0,145,255,.16) 0%,rgba(3,19,38,.72) 48%,#010712 88%),radial-gradient(ellipse at 50% 82%,rgba(0,240,255,.14) 0%,transparent 55%),linear-gradient(180deg,#010712 0%,#031326 50%,#010712 100%);z-index:0;pointer-events:none}
+.cyber-grid-overlay{position:fixed;inset:0;background-image:linear-gradient(to right,rgba(0,240,255,.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,240,255,.025) 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(circle at 50% 46%,rgba(0,0,0,.9) 15%,transparent 72%);-webkit-mask-image:radial-gradient(circle at 50% 46%,rgba(0,0,0,.9) 15%,transparent 72%);z-index:1;pointer-events:none}
+.vignette-overlay{position:fixed;inset:0;box-shadow:inset 0 0 130px 45px rgba(1,5,12,.95);z-index:2;pointer-events:none}
+#cv{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+
+/* ---------- top status strip ---------- */
+#bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top) + 8px) 12px 4px;pointer-events:none}
+#stat{pointer-events:auto;display:flex;gap:10px;font-size:.62rem;letter-spacing:.1em;color:#65ddeb;background:rgba(2,13,28,.7);border:1px solid rgba(var(--rgb),.3);border-radius:12px;padding:7px 12px;backdrop-filter:blur(8px)}
+#stat span:empty{display:none}
+#stat span+span:not(:empty)::before{content:'·';margin-right:10px;opacity:.5}
+#gear{pointer-events:auto;background:rgba(2,13,28,.7);border:1px solid rgba(var(--rgb),.3);border-radius:12px;color:var(--cyan-bright);font-size:18px;padding:5px 10px}
+
+/* ---------- core stage ---------- */
+.stage-container{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:1150px;z-index:4;padding:52px 0 var(--dock-h);pointer-events:none}
+.jarvis-core-assembly{position:relative;flex:none;width:min(84vw,500px,calc(100dvh - var(--dock-h) - 240px));height:min(84vw,500px,calc(100dvh - var(--dock-h) - 240px));min-width:150px;min-height:150px;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;margin-top:-2vh;cursor:pointer;will-change:transform;pointer-events:auto}
+.holo-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;will-change:transform}
+.holo-layer svg{width:100%;height:100%;overflow:visible}
+.spin-cw-ultra-slow{transform-origin:250px 250px;animation:rotateCW 55s linear infinite}
+.spin-ccw-slow{transform-origin:250px 250px;animation:rotateCCW 38s linear infinite}
+.spin-cw-slow{transform-origin:250px 250px;animation:rotateCW 32s linear infinite}
+.spin-ccw-med{transform-origin:250px 250px;animation:rotateCCW 22s linear infinite}
+.spin-cw-med{transform-origin:250px 250px;animation:rotateCW 18s linear infinite}
+.spin-cw-fast{transform-origin:250px 250px;animation:rotateCW 12s linear infinite}
+.spin-ccw-fast{transform-origin:250px 250px;animation:rotateCCW 10s linear infinite}
+@keyframes rotateCW{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes rotateCCW{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+.core-center-text{position:relative;z-index:25;font-weight:900;font-size:clamp(1.05rem,3.4vw,1.7rem);letter-spacing:.24em;padding-left:.24em;color:#fff;text-shadow:0 0 8px #fff,0 0 18px #00f0ff,0 0 34px #0088ff;transform-style:preserve-3d;animation:pulse 3s ease-in-out infinite;pointer-events:none}
+@keyframes pulse{50%{text-shadow:0 0 12px white,0 0 28px #00f0ff,0 0 48px #0088ff}}
+.volumetric-beam{position:absolute;bottom:-15%;width:72%;height:54%;background:linear-gradient(to top,rgba(0,240,255,.36),rgba(0,160,255,.14) 52%,transparent);clip-path:polygon(24% 100%,76% 100%,100% 0,0 0);filter:blur(10px);pointer-events:none;z-index:1;opacity:.55}
+.core-flash{position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,rgba(184,252,255,.55) 0%,rgba(0,240,255,.22) 38%,transparent 70%);opacity:0;pointer-events:none;mix-blend-mode:screen}
+.projector-base-wrapper{position:relative;flex:none;width:min(94vw,580px);height:min(32vw,150px);margin-top:-34px;display:flex;align-items:center;justify-content:center;perspective:720px;pointer-events:none;z-index:2}
+.projector-disc{width:100%;height:225%;transform:rotateX(75deg);transform-style:preserve-3d;display:flex;align-items:center;justify-content:center}
+.projector-disc svg{width:100%;height:100%;overflow:visible}
+.proj-spin-cw{transform-origin:250px 250px;animation:rotateCW 26s linear infinite}
+.proj-spin-ccw{transform-origin:250px 250px;animation:rotateCCW 17s linear infinite}
+
+/* ---------- caption (Jarvis' words) ---------- */
+#me{flex:none;max-width:min(88vw,560px);font-size:.78rem;letter-spacing:.12em;color:#65ddeb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+#me:empty{display:none}
+#me:not(:empty)::before{content:'YOU › ';opacity:.7}
+.speech-caption{flex:none;position:relative;max-width:min(90vw,560px);max-height:17vh;overflow-y:auto;scrollbar-width:none;text-align:center;font-weight:600;font-size:var(--fs);line-height:1.35;letter-spacing:.04em;color:#d4fcff;text-shadow:0 0 14px rgba(0,240,255,.7);padding:6px 24px;border-radius:18px;background:linear-gradient(90deg,transparent,rgba(2,24,46,.62),transparent);pointer-events:auto;white-space:pre-wrap;margin-top:2px}
+.speech-caption::-webkit-scrollbar{display:none}
+#ai .w{opacity:.42;transition:opacity .18s,text-shadow .18s}
+#ai .w.done{opacity:.88}
+#ai .w.cur{opacity:1;color:#fff;text-shadow:0 0 10px #00f0ff,0 0 22px #0088ff}
+#prev{display:none;flex:none;max-width:min(88vw,520px);border:1px solid rgba(var(--rgb),.3);border-radius:12px;padding:6px 10px;font-size:.8rem;color:var(--txt2);background:rgba(2,13,28,.7);pointer-events:auto;margin-top:4px}
+#prev.on{display:block}
+#prev .ph{display:flex;justify-content:space-between;gap:10px;margin-bottom:3px;opacity:.85}
+#prev img{height:54px;border-radius:8px;margin:2px 0}
+#prev .pt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+#prev.open .pt{display:block;max-height:14vh;overflow:auto}
+#sugg{flex:none;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:min(94vw,560px);margin-top:6px;pointer-events:auto}
+
+/* ---------- dock ---------- */
+.control-dock{position:fixed;bottom:calc(max(env(safe-area-inset-bottom),40px) + 6px);left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;width:min(94vw,560px)}
+.dock-toggle{align-self:flex-end;margin-bottom:6px}
+.control-panel{width:100%;max-height:420px;background:rgba(2,13,28,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(var(--rgb),.35);box-shadow:0 0 28px rgba(0,170,255,.22),inset 0 0 14px rgba(var(--rgb),.08);border-radius:16px;padding:10px 12px;overflow:hidden;transition:all .28s cubic-bezier(.16,1,.3,1);transform-origin:bottom center}
+.control-panel.collapsed{opacity:0;transform:translateY(14px) scale(.96);pointer-events:none;max-height:0;padding-top:0;padding-bottom:0;border-width:0;margin:0}
+.hud-btn{background:rgba(0,180,255,.14);border:1px solid rgba(var(--rgb),.45);color:#bdfaff;font-size:.68rem;letter-spacing:.08em;padding:8px 11px;border-radius:10px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.hud-btn:active{transform:scale(.96)}
+.hud-btn.on,#mic.on{background:rgba(255,55,90,.26);border-color:#ff4d6d;color:#ffc2cd;box-shadow:0 0 16px rgba(255,55,90,.5)}
+#tb .hud-btn.on{background:rgba(var(--rgb),.3);border-color:var(--c);color:#fff;box-shadow:0 0 14px rgba(var(--rgb),.5)}
+.hud-input{background:rgba(1,9,20,.8);border:1px solid rgba(var(--rgb),.35);color:var(--txt);font-family:'Rajdhani',system-ui,sans-serif;font-size:1rem;padding:8px 12px;border-radius:10px;outline:none;width:100%;min-width:0}
+.hud-input:focus{border-color:var(--c);box-shadow:0 0 12px rgba(var(--rgb),.32)}
+.control-row{display:flex;gap:8px;align-items:center}
+.control-row .hud-btn{flex:none;white-space:nowrap}
+.status-line{font-size:.6rem;letter-spacing:.13em;color:#65ddeb;margin:0 0 8px 2px;display:flex;justify-content:space-between}
+#chips{display:flex;gap:7px;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid rgba(var(--rgb),.35);background:rgba(0,180,255,.1);color:var(--txt2);font-family:'Rajdhani',system-ui,sans-serif;font-weight:600;border-radius:14px;padding:6px 12px;font-size:.85rem;white-space:nowrap}
+#tb{display:flex;gap:6px;margin-top:8px}
+#tb .hud-btn{flex:1;padding:8px 0;font-size:1rem}
+
+/* ---------- overlay panels (settings, notes, history, device) ---------- */
+#modal,#np,#dp,#pp{position:fixed;inset:0;background:rgba(var(--bgrgb),.98);display:none;padding:20px;z-index:90;overflow-y:auto}
+#modal.show,#np.show,#dp.show,#pp.show{display:flex}
+#card,#nc,#dc,#pc{width:100%;max-width:420px;margin:auto}
+#card h2,#nc h2,#dc h2,#pc h2{font-weight:700;letter-spacing:.3em;font-size:.9rem;margin:0 0 16px;color:var(--c)}
+#card label{display:block;font-size:.8rem;opacity:.75;margin:12px 0 4px}
+#card input,#card textarea,#card select{font-family:inherit;width:100%;background:rgba(var(--rgb),.06);border:1px solid rgba(var(--rgb),.3);border-radius:10px;color:var(--txt);padding:11px;font-size:.95rem}
+#card button,#nc button,#dc button,#pc button{margin-top:14px;width:100%;padding:12px;border-radius:10px;border:1px solid var(--c);background:rgba(var(--rgb),.14);color:var(--c);font-size:.95rem;font-family:inherit}
+.nt{display:flex;gap:10px;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(var(--rgb),.15);font-size:.95rem;color:var(--txt2)}
+.nt small{display:block;opacity:.5;font-size:.72rem}
+.nt b{opacity:.7;padding:0 6px}
+#nf{display:none;width:100%;margin:0 0 8px;background:rgba(var(--rgb),.06);border:1px solid rgba(var(--rgb),.3);border-radius:10px;color:var(--txt);padding:10px;font-size:.95rem;font-family:inherit}
+#dc .dr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(var(--rgb),.15);color:var(--txt2)}
+#dc .dr span{flex:1}
+#dc .dr button{width:auto;margin:0 0 0 8px;padding:8px 16px;font-size:.9rem}
+#dc .dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+#dc .dg button{margin:0;font-size:.9rem}
+
+/* ---------- simple layout: header + core + composer ---------- */
+#hl{display:flex;flex-direction:column;line-height:1.2;pointer-events:auto}
+#hl b{font-family:'Orbitron','Rajdhani',system-ui,sans-serif;font-size:.8rem;letter-spacing:.22em;color:var(--txt)}
+#st{font-size:.56rem;letter-spacing:.14em;color:#65ddeb;font-family:'Orbitron','Rajdhani',system-ui,sans-serif}
+#hr{display:flex;align-items:center;gap:8px}
+#stat{background:none;border:0;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none;font-size:.64rem;color:#65ddeb;letter-spacing:.06em}
+#gear{background:none;border:0;font-size:20px;padding:6px}
+.stage-container{padding:60px 0 var(--dock-h)}
+.composer{display:flex;align-items:center;gap:6px;width:100%;background:rgba(2,13,28,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(var(--rgb),.38);box-shadow:0 0 26px rgba(0,170,255,.22);border-radius:30px;padding:6px}
+.composer .hud-input{background:transparent;border:0;box-shadow:none;font-size:1.02rem;padding:8px 4px;border-radius:0}
+#plus,#mic{width:44px;height:44px;flex:none;border-radius:50%;font-size:1.25rem;padding:0;cursor:pointer;background:rgba(0,180,255,.14);border:1px solid rgba(var(--rgb),.4);color:#bdfaff}
+#mic.on{background:rgba(255,55,90,.28);border-color:#ff4d6d;color:#ffc2cd;box-shadow:0 0 16px rgba(255,55,90,.5)}
+#mic.send{background:rgba(var(--rgb),.9);color:#012;border-color:var(--c)}
+#sheet{position:fixed;inset:0;z-index:80;display:none;background:rgba(1,5,12,.6)}
+#sheet.show{display:block}
+#sh{position:absolute;left:0;right:0;bottom:0;background:rgba(2,13,28,.97);border-top:1px solid rgba(var(--rgb),.4);border-radius:24px 24px 0 0;padding:10px 14px calc(max(env(safe-area-inset-bottom),40px) + 12px);box-shadow:0 -10px 40px rgba(0,120,255,.25)}
+.grab{width:42px;height:4px;border-radius:2px;background:rgba(var(--rgb),.4);margin:0 auto 14px}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sbtn{display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(0,180,255,.1);border:1px solid rgba(var(--rgb),.3);border-radius:14px;padding:12px 2px;color:#bdfaff;font-size:1.35rem}
+.sbtn small{font-family:'Orbitron','Rajdhani',system-ui,sans-serif;font-size:.5rem;letter-spacing:.06em}
+.sbtn.on{background:rgba(var(--rgb),.3);border-color:var(--c);color:#fff;box-shadow:0 0 14px rgba(var(--rgb),.45)}
+.slabel{font-family:'Orbitron','Rajdhani',system-ui,sans-serif;font-size:.58rem;letter-spacing:.2em;color:#65ddeb;margin:16px 2px 8px}
+#sh #chips{flex-wrap:wrap;overflow:visible}
+
+#pc .dr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(var(--rgb),.15);color:var(--txt2)}
+#pc .dr span{flex:1}
+#pc .dr button{width:auto;margin:0 0 0 8px;padding:7px 12px;font-size:.78rem}
+#pc .pchips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+#pc .pchips .chip{width:auto;margin:0;padding:6px 12px;font-size:.85rem}
+#pc .pin{width:100%;margin-top:8px;background:rgba(var(--rgb),.06);border:1px solid rgba(var(--rgb),.3);border-radius:10px;color:var(--txt);padding:10px;font-size:.95rem;font-family:inherit;user-select:text}
+#pc .pnote{font-size:.85rem;color:var(--txt2);opacity:.85;margin:8px 0;white-space:pre-wrap}
+#pc .slabel{margin-top:18px}
+/* ---------- popup (floating assistant): core + light-blue shade + chat column ---------- */
+#px,#po{display:none;position:fixed;top:8px;background:none;border:0;color:var(--cyan-bright);font-size:20px;padding:8px 12px;opacity:.85;z-index:60;text-shadow:0 0 8px rgba(1,7,18,.9)}
+#px{right:8px}#po{left:8px}
+#shade,#pchat{display:none}
+html.pop,body.pop{background:transparent}
+body.pop .space-backdrop,body.pop .cyber-grid-overlay,body.pop .vignette-overlay,body.pop #cv,body.pop #bar,body.pop #sheet,body.pop .projector-base-wrapper,body.pop #prev,body.pop #sugg,body.pop #chips,body.pop #tb,body.pop .status-line,body.pop .dock-toggle{display:none}
+body.pop .stage-container{padding:34px 0 calc(var(--dock-h) + 33vh)}
+body.pop .stage-container{filter:drop-shadow(0 3px 10px rgba(0,32,64,.55))}
+html[data-tint=ice] body.pop .stage-container{filter:hue-rotate(14deg) saturate(.78) drop-shadow(0 3px 10px rgba(0,32,64,.55))}
+html[data-tint=blue] body.pop .stage-container{filter:hue-rotate(30deg) drop-shadow(0 3px 10px rgba(0,32,64,.55))}
+body.pop .core-center-text{text-shadow:0 0 3px #003a63,0 0 8px #003a63,0 0 18px #00f0ff}
+body.pop .jarvis-core-assembly{width:min(72vw,36vh);height:min(72vw,36vh);margin-top:0}
+body.pop #shade{display:block;position:fixed;left:0;right:0;bottom:0;height:70%;z-index:30;pointer-events:none;border-radius:26px 26px 0 0;background:linear-gradient(to top,rgba(143,211,255,.86) 0%,rgba(143,211,255,.55) 40%,rgba(143,211,255,0) 100%);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);-webkit-mask-image:linear-gradient(to top,#000 58%,transparent);mask-image:linear-gradient(to top,#000 58%,transparent)}
+body.pop #pchat{display:flex;flex-direction:column;gap:6px;position:fixed;left:0;right:0;bottom:var(--dock-h);max-height:33vh;overflow-y:auto;scrollbar-width:none;padding:0 14px 4px;z-index:40}
+body.pop #pchat::-webkit-scrollbar{display:none}
+#pfeed{display:none}
+.pb{max-width:86%;padding:8px 12px;border-radius:14px;font-size:calc(var(--fs) * .95);line-height:1.35;white-space:pre-wrap;word-break:break-word;font-weight:600;letter-spacing:.02em;margin:0}
+.pb.u{align-self:flex-end;background:rgba(143,211,255,.62);color:#06304f;text-shadow:none;border:1px solid rgba(255,255,255,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.pb.a{align-self:flex-start;background:rgba(255,255,255,.72);color:#06304f;text-shadow:none;border:1px solid rgba(255,255,255,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+body.pop #ai .w{opacity:.5}
+body.pop #ai .w.done{opacity:.95}
+body.pop #ai .w.cur{opacity:1;color:#003f66;font-weight:700;text-shadow:none}
+body.pop #me::before{content:none}
+body.pop #me{color:#08324f;white-space:pre-wrap;overflow:visible;text-overflow:clip;max-width:86%;font-size:calc(var(--fs) * .95);letter-spacing:.02em;margin:0}
+body.pop .volumetric-beam{display:none}
+body.pop #ai{max-height:none;overflow:visible;text-align:left}
+body.pop .control-dock{bottom:10px;z-index:50}
+body.pop .composer{background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.85);box-shadow:0 4px 18px rgba(8,50,79,.12)}
+body.pop #plus{display:none}
+body.pop #mic{background:rgba(8,50,79,.88);color:#d4fcff;border-color:rgba(8,50,79,.95)}
+body.pop #hr,body.pop #hl{display:none}
+body.pop .control-panel{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.8);box-shadow:0 4px 18px rgba(8,50,79,.12);border-radius:28px;padding:8px 10px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+body.pop .hud-input{border-radius:20px}
+body.pop .hud-btn{border-radius:18px}
+body.pop .hud-input{background:rgba(255,255,255,.9);color:#08324f;border-color:rgba(8,50,79,.3)}
+body.pop .hud-input::placeholder{color:rgba(8,50,79,.55)}
+body.pop .hud-btn{background:rgba(8,50,79,.88);color:#d4fcff;border-color:rgba(8,50,79,.95)}
+body.pop #mic.on{background:rgba(255,55,90,.9);color:#fff;border-color:#ff4d6d}
+
+/* ---------- options ---------- */
+html[data-tint=ice] .stage-container{filter:hue-rotate(14deg) saturate(.78) brightness(1.05)}
+html[data-tint=blue] .stage-container{filter:hue-rotate(30deg) brightness(1.05)}
+html.lite .holo-layer g[filter]{filter:none}
+html.lite .volumetric-beam{filter:none}
+html.lite .cyber-grid-overlay{display:none}
+@media(max-width:520px){.control-panel{padding:9px 10px}.hud-btn{font-size:.6rem;padding:8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:40s!important;transition:none!important}}
+</style></head><body>
+<div class="space-backdrop"></div><div class="cyber-grid-overlay"></div><div class="vignette-overlay"></div>
+<canvas id="cv"></canvas>
+<div id="shade"></div>
+<header id="bar"><div id="hl"><b>J.A.R.V.I.S.</b><span id="st">SYSTEM ONLINE</span></div><div id="hr"><div id="stat"><span id="tm"></span><span id="bt"></span><span id="nw"></span><span id="wx"></span></div><button id="gear" aria-label="Settings">⚙</button></div></header>
+<button id="px" aria-label="Close">✕</button><button id="po" aria-label="Open full app">↗</button>
+<main class="stage-container" id="stage">
+  <div class="jarvis-core-assembly" id="core" title="Ketuk Core untuk berbicara">
+    <div class="volumetric-beam" id="beam"></div><div class="core-flash" id="flash"></div>
+
+
+    <!-- LAPISAN 1: Halo eksternal dan bracket lengkung -->
+    <div class="holo-layer" data-base-z="-65" data-z-amp="-45" data-scale-amp=".06"><svg viewBox="0 0 500 500">
+      <defs><filter id="glow-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <circle cx="250" cy="250" r="240" fill="none" stroke="#0088ff" stroke-width="1" stroke-opacity=".35" stroke-dasharray="160 45 25 45" class="spin-cw-ultra-slow"/>
+      <g filter="url(#glow-soft)" class="spin-ccw-slow"><path d="M42 155 A226 226 0 0 0 42 345" fill="none" stroke="#00f0ff" stroke-width="5.5" stroke-linecap="round" opacity=".9"/><path d="M458 155 A226 226 0 0 1 458 345" fill="none" stroke="#00f0ff" stroke-width="5.5" stroke-linecap="round" opacity=".9"/><path d="M165 30 A226 226 0 0 1 335 30" fill="none" stroke="#00aaff" stroke-width="2.5" stroke-dasharray="14 8" opacity=".65"/><path d="M165 470 A226 226 0 0 0 335 470" fill="none" stroke="#00aaff" stroke-width="2.5" stroke-dasharray="14 8" opacity=".65"/></g>
+    </svg></div>
+
+    <!-- LAPISAN 2: Busur terputus dan node koordinat -->
+    <div class="holo-layer" data-base-z="-42" data-z-amp="38" data-scale-amp=".08"><svg viewBox="0 0 500 500"><g class="spin-cw-slow" opacity=".75"><circle cx="250" cy="250" r="212" fill="none" stroke="#00b8ff" stroke-width="2" stroke-dasharray="55 20 12 20"/><circle cx="250" cy="250" r="205" fill="none" stroke="#00f0ff" stroke-width="1" stroke-dasharray="3 8"/></g></svg></div>
+
+    <!-- LAPISAN 3: Dial pengukur derajat -->
+    <div class="holo-layer" data-base-z="-20" data-z-amp="-52" data-scale-amp=".10"><svg viewBox="0 0 500 500"><g class="spin-ccw-med"><circle cx="250" cy="250" r="192" fill="none" stroke="#7ceeff" stroke-width="8" stroke-dasharray="1.8 8.25" opacity=".82"/><circle cx="250" cy="250" r="183" fill="none" stroke="#00f0ff" stroke-width="12" stroke-dasharray="3 44.9" opacity=".65"/></g></svg></div>
+
+    <!-- LAPISAN 4: Blok energi cyan -->
+    <div class="holo-layer" data-base-z="8" data-z-amp="62" data-scale-amp=".13"><svg viewBox="0 0 500 500">
+      <defs><filter id="glow-energy-blocks" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6.5" result="blur1"/><feGaussianBlur stdDeviation="2" result="blur2"/><feMerge><feMergeNode in="blur1"/><feMergeNode in="blur2"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <g class="spin-cw-med" filter="url(#glow-energy-blocks)"><circle cx="250" cy="250" r="166" fill="none" stroke="#00f0ff" stroke-width="11" stroke-dasharray="110 150.7" stroke-dashoffset="55" opacity=".7"/><circle cx="250" cy="250" r="166" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="90 170.7" stroke-dashoffset="45" stroke-linecap="round"/></g>
+    </svg></div>
+
+    <!-- LAPISAN 5: Mekanis sirkuit dan segmen teknis -->
+    <div class="holo-layer" data-base-z="26" data-z-amp="-48" data-scale-amp=".14"><svg viewBox="0 0 500 500"><g class="spin-ccw-fast"><circle cx="250" cy="250" r="148" fill="none" stroke="#0099ff" stroke-width="4" stroke-dasharray="45 18 12 18 75 22" opacity=".85"/><circle cx="250" cy="250" r="141" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".7"/></g></svg></div>
+
+    <!-- LAPISAN 6: Cincin dalam bersegmen tebal -->
+    <div class="holo-layer" data-base-z="44" data-z-amp="74" data-scale-amp=".17"><svg viewBox="0 0 500 500">
+      <defs><filter id="glow-intense" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="7.5" result="blur1"/><feGaussianBlur stdDeviation="2.5" result="blur2"/><feMerge><feMergeNode in="blur1"/><feMergeNode in="blur2"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <g class="spin-cw-fast" filter="url(#glow-intense)"><circle cx="250" cy="250" r="124" fill="none" stroke="#00f0ff" stroke-width="9" stroke-dasharray="140 54.7" stroke-dashoffset="25" opacity=".8"/><circle cx="250" cy="250" r="124" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="120 74.7" stroke-dashoffset="15" stroke-linecap="round"/></g>
+    </svg></div>
+
+    <!-- LAPISAN 7: Cincin pelindung inti ganda dan aura pusat -->
+    <div class="holo-layer" data-base-z="60" data-z-amp="-35" data-scale-amp=".18"><svg viewBox="0 0 500 500">
+      <defs><radialGradient id="core-aura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00f0ff" stop-opacity=".32"/><stop offset="62%" stop-color="#0077ff" stop-opacity=".14"/><stop offset="100%" stop-color="#010712" stop-opacity="0"/></radialGradient><filter id="core-glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <circle cx="250" cy="250" r="112" fill="url(#core-aura)"/><g class="spin-ccw-med" filter="url(#core-glow)"><circle cx="250" cy="250" r="106" fill="none" stroke="#00eaff" stroke-width="2.5" stroke-dasharray="90 18 24 18" opacity=".9"/><circle cx="250" cy="250" r="98" fill="none" stroke="#b8fcff" stroke-width="1.5" stroke-dasharray="2 7"/></g>
+      <circle cx="250" cy="250" r="82" fill="none" stroke="#0088ff" stroke-width="1" opacity=".7"/>
+    </svg></div>
+
+    <!-- LAPISAN 8: Inti energi pusat -->
+    <div class="holo-layer" data-base-z="78" data-z-amp="28" data-scale-amp=".12"><svg viewBox="0 0 500 500">
+      <defs><radialGradient id="inner-core"><stop offset="0%" stop-color="#eaffff" stop-opacity=".95"/><stop offset="22%" stop-color="#00f0ff" stop-opacity=".45"/><stop offset="72%" stop-color="#0077ff" stop-opacity=".10"/><stop offset="100%" stop-color="#010712" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="250" cy="250" r="78" fill="url(#inner-core)"/><circle cx="250" cy="250" r="58" fill="none" stroke="#00f0ff" stroke-width="1.5" opacity=".65"/><circle cx="250" cy="250" r="48" fill="none" stroke="#b8fcff" stroke-width="1" stroke-dasharray="2 5" opacity=".8"/>
+    </svg></div>
+        <div class="core-center-text" id="ctr">J.A.R.V.I.S.</div>
+  </div>
+  <div class="projector-base-wrapper"><div class="projector-disc"><svg viewBox="0 0 500 500">
+    <defs><filter id="base-glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <g filter="url(#base-glow)"><circle cx="250" cy="250" r="205" fill="none" stroke="#0088ff" stroke-width="3" stroke-dasharray="65 12 18 12" class="proj-spin-cw"/><circle cx="250" cy="250" r="174" fill="none" stroke="#00f0ff" stroke-width="5" stroke-dasharray="100 22 15 22" class="proj-spin-ccw"/><circle cx="250" cy="250" r="140" fill="none" stroke="#b8fcff" stroke-width="1.5" stroke-dasharray="3 8"/><path d="M45 250 H455 M250 45 V455" stroke="#00aaff" stroke-width="1" opacity=".5"/></g>
+  </svg></div></div>
+  <div id="me"></div>
+  <div class="speech-caption" id="ai" aria-live="polite">Selamat datang. J.A.R.V.I.S. siap membantu Anda.</div>
+  <div id="prev"></div><div id="sugg"></div>
+</main>
+<div class="control-dock" id="dock">
+  <div class="composer"><button id="plus" aria-label="More">＋</button><input class="hud-input" id="txt" type="text" placeholder="Ketik perintah untuk J.A.R.V.I.S...." autocomplete="off"><button id="mic" aria-label="Mic">🎙</button></div>
+</div>
+<div id="sheet"><div id="sh"><div class="grab"></div>
+  <div class="sgrid">
+    <button class="sbtn" id="cam"><span>📷</span><small>PHOTO</small></button>
+    <button class="sbtn" id="atc"><span>📎</span><small>FILES</small></button>
+    <button class="sbtn" id="sb"><span>🔎</span><small>SEARCH</small></button>
+    <button class="sbtn" id="dv"><span>🎛</span><small>DEVICE</small></button>
+    <button class="sbtn" id="nb"><span>📝</span><small>NOTES</small></button>
+    <button class="sbtn" id="lb"><span>🕘</span><small>HISTORY</small></button>
+    <button class="sbtn" id="hf"><span>🔁</span><small>HANDS-FREE</small></button>
+    <button class="sbtn" id="pl"><span>🧩</span><small>PLUGINS</small></button>
+  </div>
+  <div class="slabel">QUICK ACTIONS</div><div id="chips"></div>
+</div></div>
+<div id="np"><div id="nc"><h2>NOTES</h2><input id="nf" placeholder="Search…"><div id="nl"></div><button id="ns">Share all</button><button id="nx">Close</button></div></div>
+<div id="pp"><div id="pc"><h2>PLUGINS</h2><div id="pl2"></div><button id="px2">Close</button></div></div>
+<div id="dp"><div id="dc"><h2>DEVICE</h2><div id="dl"></div><button id="dx">Close</button></div></div>
+<div id="modal"><div id="card">
+  <h2>CONFIGURATION</h2>
+  <label>Core colour</label><select id="ct"><option value="cyan">Cyan (design)</option><option value="ice">Light blue</option><option value="blue">Deep blue</option></select>
+  <label>Core effects (choose Lite if the phone feels slow)</label><select id="fx"><option value="full">Full</option><option value="lite">Lite</option></select>
+  <label>Text size</label><input id="fs" type="range" min="12" max="24" step="1">
+  <label>Quick actions (one per line: label | prompt). End a prompt with … to fill the box instead of sending. Empty = defaults.</label><textarea id="qa" rows="4" placeholder="☀ Weather | Give me today’s weather."></textarea>
+  <label>Brain API key (Groq gsk_… or Anthropic sk-ant-…)</label><input id="ak" type="password" autocomplete="off">
+  <label>Fish Audio API key (voice)</label><input id="fk" type="password" autocomplete="off">
+  <label>Fish Audio voice ID (reference_id from a model’s URL)</label><input id="vid">
+  <label>Fish Audio TTS model</label><input id="fm" placeholder="s1">
+  <label>Brain model (optional)</label><input id="cm" placeholder="default: openai/gpt-oss-120b (Groq) / claude-sonnet-5-5">
+  <label>Backup AI models, used when the main one hits a limit. One per line: name | base URL | API key | model | vision model (optional). Use "anthropic" as the base URL for Claude.</label><textarea id="pv" rows="4" placeholder="openrouter | https://openrouter.ai/api/v1 | sk-or-… | model-name"></textarea>
+  <label>Tavily search key (optional, free at tavily.com: much better live search)</label><input id="tk" type="password" autocomplete="off" placeholder="tvly-…">
+  <label>Spotify Client ID (optional, finds the exact song)</label><input id="si" autocomplete="off">
+  <label>Spotify Client Secret (optional, stays on this phone only)</label><input id="ss" type="password" autocomplete="off">
+  <label>Home city (for weather)</label><input id="hc">
+  <label>Home Assistant URL (for smart home), e.g. http://192.168.1.10:8123</label><input id="hu">
+  <label>Home Assistant long-lived token</label><input id="ht" type="password" autocomplete="off">
+  <label>Vision model for screen analysis (optional)</label><input id="vm" placeholder="qwen/qwen3.8-27b">
+  <label>WhatsApp allowed contacts: name=number (country code, digits), comma separated</label><input id="wc" placeholder="mom=628123456789, boss=14155550123">
+  <label>WhatsApp messages per day</label><input id="wl" type="number" placeholder="5">
+  <button id="fg" style="opacity:.6">Erase memory &amp; history</button>
+  <button id="save">Save</button>
+</div></div>
+<input id="fc" type="file" accept="image/*" capture="environment" hidden><input id="fa" type="file" accept="image/*,.pdf,.docx,.txt,.md,.csv,.json" hidden>
+<script>
+const $=id=>document.getElementById(id);
+let cfg={};try{cfg=JSON.parse(localStorage.getItem('jv')||'{}')}catch(e){}
+const SYS="You are J.A.R.V.I.S., the refined, dry-witted AI butler from Tony Stark’s lab. Address the user as 'sir'. Your replies are spoken aloud: keep them to one to three short sentences, plain text only, no markdown, lists, or emojis (exception: when asked for code, put it in a fenced code block and say only one short sentence about it). Be capable, calm, and subtly sarcastic when it fits. Never use filler such as 'Done', 'Confirmed', 'Certainly', 'Of course', 'Understood', 'Noted' or 'Is there anything else?', and never end with a question or an offer unless it is truly needed. Do not repeat the same closing phrase twice in a row.";
+let mode='idle',hist=[],ctx,an,buf,rec,chunks=[],stream,micSrc,playSrc,heard=0,lastLoud=0,recStart=0;
+const LBL={idle:'SYSTEM ONLINE',listening:'LISTENING...',thinking:'PROCESSING...',speaking:'SPEAKING'};
+function setMode(m){mode=m;$('st').textContent=LBL[m];$('mic').classList.toggle('on',m==='listening');document.body.dataset.mode=m}
+function say(t){KJ.on=false;$('ai').textContent=t;$('ai').scrollTop=0}
+function hfSync(){$('hf').classList.toggle('on',hf)}
+function audio(){if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();an=ctx.createAnalyser();an.fftSize=512;buf=new Uint8Array(an.fftSize)}if(ctx.state==='suspended')ctx.resume()}
+function rms(){an.getByteTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++){const v=(buf[i]-128)/128;s+=v*v}return Math.sqrt(s/buf.length)}
+
+/* ---------- settings ---------- */
+function openCfg(){$('ak').value=cfg.ak||'';$('fk').value=cfg.fk||'';$('vid').value=cfg.vid||'';$('fm').value=cfg.fm||'';$('cm').value=cfg.cm||'';$('wc').value=cfg.wc||'';$('tk').value=cfg.tk||'';$('si').value=cfg.si||'';$('pv').value=cfg.pv||'';$('ct').value=cfg.ct||'cyan';$('fx').value=cfg.fx||'full';$('fs').value=cfg.fs||16;$('qa').value=cfg.qa||'';$('hc').value=cfg.hc||'';$('hu').value=cfg.hu||'';$('ht').value=cfg.ht||'';$('vm').value=cfg.vm||'';$('ss').value=cfg.ss||'';$('wl').value=cfg.wl||'';$('modal').classList.add('show')}
+$('gear').onclick=openCfg;
+async function checkAssist(){try{const n=NB();if(!n)return;const u=(await n.consumeUrl()).url;if(u)oauthDone(u);if(mode==='idle'&&(await n.consumeAssist()).v)startRec()}catch(e){}}
+setInterval(checkAssist,1200);
+setTimeout(async()=>{try{const n=NB();if(n&&(await n.isPopup()).v){document.documentElement.classList.add('pop');document.body.classList.add('pop');popSetup();$('px').onclick=()=>n.closePopup();$('po').onclick=()=>n.openMain()}}catch(e){console.error('popup setup failed: '+e)}},0);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&mode==='idle'){hist=J('jh')||[];while(hist.length&&hist[0].role!=='user')hist.shift()}});
+let curShare='';
+function showList(title,rows,filt){$('nf').style.display=filt?'block':'none';const box=$('nl');box.innerHTML='';$('nc').querySelector('h2').textContent=title;curShare=rows.map(x=>'• '+x.t).join('\n');
+  if(!rows.length){const d=document.createElement('div');d.className='nt';d.textContent='Nothing here yet.';box.appendChild(d)}
+  rows.forEach(x=>{const d=document.createElement('div');d.className='nt';const sp=document.createElement('span');sp.textContent=x.t;const m=document.createElement('small');m.textContent=x.d||'';sp.appendChild(m);d.appendChild(sp);if(x.del){const bt=document.createElement('b');bt.textContent='✕';bt.onclick=x.del;d.appendChild(bt)}box.appendChild(d)});
+  $('np').classList.add('show')}
+function showNotes(){const L=J('jn')||[];showList('NOTES',L.map((x,i)=>({t:x.t,d:x.d,del:()=>{L.splice(i,1);localStorage.setItem('jn',JSON.stringify(L));showNotes()}})))}
+function showLog(){const all=(J('jl')||[]).slice(-300).reverse(),draw=q=>showList('HISTORY',all.filter(x=>!q||x.t.toLowerCase().includes(q)).slice(0,150).map(x=>({t:(x.r==='u'?'You: ':'Jarvis: ')+x.t,d:x.d})),true);$('nf').value='';draw('');$('nf').oninput=e=>draw(e.target.value.toLowerCase())}
+$('nb').onclick=showNotes;$('lb').onclick=showLog;$('nx').onclick=()=>$('np').classList.remove('show');
+$('ns').onclick=async()=>{const n=NB();if(n)n.shareText({text:curShare});else try{await navigator.clipboard.writeText(curShare)}catch(e){}};
+$('fg').onclick=()=>{const b=$('fg');if(b.dataset.s){['jh','jm'].forEach(k=>localStorage.removeItem(k));hist=[];delete b.dataset.s;b.textContent='Erased';setTimeout(()=>b.textContent='Erase memory & history',1500)}else{b.dataset.s=1;b.textContent='Tap again to erase everything';setTimeout(()=>{delete b.dataset.s;b.textContent='Erase memory & history'},4000)}};
+$('hf').onclick=()=>{hf=!hf;hfSync();if(hf&&mode==='idle'&&cfg.ak&&cfg.fk)startRec()};
+$('save').onclick=()=>{cfg={ak:$('ak').value.trim(),fk:$('fk').value.trim(),vid:$('vid').value.trim(),fm:$('fm').value.trim(),cm:$('cm').value.trim(),wc:$('wc').value.trim(),tk:$('tk').value.trim(),si:$('si').value.trim(),pv:$('pv').value.trim(),ct:$('ct').value,fx:$('fx').value,fs:$('fs').value,qa:$('qa').value,hc:$('hc').value.trim(),hu:$('hu').value.trim(),ht:$('ht').value.trim(),vm:$('vm').value.trim(),ss:$('ss').value.trim(),wl:$('wl').value.trim()};try{localStorage.setItem('jv',JSON.stringify(cfg))}catch(e){}$('modal').classList.remove('show');applyTint();applyFs();size();renderChips();paintWx()};
+if(!cfg.ak||!cfg.fk)setTimeout(openCfg,400);
+
+/* ---------- brain + tools ---------- */
+let hf=false,cancel=0,_n;
+const NB=()=>{if(_n)return _n;const C=window.Capacitor;if(!C||!(C.isNativePlatform&&C.isNativePlatform()))return null;return _n=C.registerPlugin?C.registerPlugin('JarvisNative'):C.Plugins.JarvisNative};
+const fn=(name,description,properties,required)=>({type:'function',function:{name,description,parameters:Object.assign({type:'object',properties},required.length?{required}:{})}});
+const S={type:'string'};
+const TOOLS=[
+ fn('web_search','Search the live web. REQUIRED for anything about movies, TV, games, tech, products, people, sports, news, prices, release dates or status, or anything that may have changed.',{query:S},['query']),
+ fn('open_settings','ONLY to show a settings screen when the user asks to open or see it. To switch things on or off use device_control.',{page:{type:'string',enum:['wifi','bluetooth','display','sound','battery','location','airplane','apps','accessibility','notifications','main']}},['page']),
+ fn('device_control','Actually change a phone setting: flashlight, wifi, bluetooth, airplane_mode, location (state on/off), volume (percent 0-100), or screen brightness (percent 0-100; Android permission may be required).',{setting:{type:'string',enum:['flashlight','wifi','bluetooth','airplane_mode','location','volume','brightness']},state:{type:'string',enum:['on','off']},percent:{type:'integer'}},['setting']),
+ fn('spotify','Control Spotify. "play" needs a query (e.g. song title plus artist) and a kind.',{action:{type:'string',enum:['play','pause','resume','next','previous']},query:S,kind:{type:'string',enum:['song','artist','album','playlist']}},['action']),
+ fn('set_reminder','Schedule a reminder that Jarvis SPEAKS ALOUD in his own voice at the time, even if the app is closed. Use minutes for "in N minutes", or time (local YYYY-MM-DDTHH:MM) for any date. speech = the short sentence Jarvis should say.',{label:S,time:S,minutes:{type:'number'},speech:S},['label']),
+ fn('add_calendar_event','Open a pre-filled calendar event; the user taps Save.',{title:S,start:{type:'string',description:'local time, YYYY-MM-DDTHH:MM'},minutes:{type:'integer'},location:S},['title','start']),
+ fn('notes','Manage the user’s notes.',{action:{type:'string',enum:['add','list','clear']},text:S},['action'])
+];
+const WA=fn('whatsapp','Write and send a WhatsApp message to an allowed contact.',{contact:S,message:S},['contact','message']);
+const GROQ='https://api.groq.com/openai/v1/chat/completions';
+const gh=()=>({'content-type':'application/json','Authorization':'Bearer '+cfg.ak});
+const J=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+hist=J('jh')||[];while(hist.length&&hist[0].role!=='user')hist.shift();
+const saveH=()=>{try{localStorage.setItem('jh',JSON.stringify(hist.slice(-40)))}catch(e){}};
+const mem=()=>localStorage.getItem('jm')||'';
+const sysFull=()=>{const K=J('jk')||[],C=J('jc')||[];return SYS+(mem()?' LONG-TERM MEMORY of the user from past conversations (use naturally, do not recite unless asked): '+mem():'')+(K.length?' PINNED FACTS: '+K.join('; ')+'.':'')+(C.length?' CUSTOM COMMANDS (when the user says the name, carry them out with your tools): '+C.map(x=>x.n+' = '+x.i).join(' | ')+'.':'')+' Current date and time: '+new Date().toString()+'. Time zone '+Intl.DateTimeFormat().resolvedOptions().timeZone+'.'+(cfg.hc?' Home city: '+cfg.hc+'.':'')+ctxLine+skillLine()+(curDoc?' LOADED DOCUMENT "'+curDoc.name+'" (answer questions about it; it may be truncated): '+curDoc.text:'')};
+const cool={};
+function providers(){
+  const L=[];
+  if(cfg.ak){
+    if(cfg.ak.startsWith('gsk_'))L.push({n:'groq',t:'o',u:'https://api.groq.com/openai/v1',k:cfg.ak,m:cfg.cm||'openai/gpt-oss-120b',v:cfg.vm||'qwen/qwen3.8-27b',g:1});
+    else L.push({n:'claude',t:'a',k:cfg.ak,m:cfg.cm||'claude-sonnet-5-5'});
+  }
+  (cfg.pv||'').split('\n').forEach(l=>{
+    const p=l.split('|').map(x=>x.trim());
+    if(p.length>=4&&p[2]&&p[3]){
+      const an=/^anthropic$/i.test(p[1]),u=p[1].replace(/\/+$/,'');
+      L.push({n:p[0]||('backup'+L.length),t:an?'a':'o',u:an?'':u,k:p[2],m:p[3],v:p[4]||'',g:/api\.groq\.com/.test(u)?1:0});
+    }
+  });
+  return L;
+}
+function coolFor(e){
+  const s=e.status||0,m=String(e.message||'');
+  const t=m.match(/try again in\s*(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:([\d.]+)s)?/i);
+  if(t&&(t[1]||t[2]||t[3]))return Math.min(3600000,((+t[1]||0)*3600+(+t[2]||0)*60+(+t[3]||0))*1000+2000);
+  if(s===402||/credit|billing|balance|insufficient|unauthor|invalid api key|permission/i.test(m)||s===401||s===403||s===404||/decommission|not found|model/i.test(m))return 600000;
+  if(s===429||/rate|quota|limit|exhaust|capacity|overload|too many/i.test(m))return 60000;
+  return 15000;
+}
+async function callAnth(p,msgs,tools,max){
+  const sys=msgs.filter(m=>m.role==='system').map(m=>m.content).join('\n'),out=[];
+  for(const m of msgs){
+    if(m.role==='system')continue;
+    if(m.role==='tool'){
+      const b={type:'tool_result',tool_use_id:m.tool_call_id,content:String(m.content)},l=out[out.length-1];
+      if(l&&l.role==='user'&&Array.isArray(l.content)&&l.content[0]&&l.content[0].type==='tool_result')l.content.push(b);else out.push({role:'user',content:[b]});
+      continue;
+    }
+    if(m.role==='assistant'&&m.tool_calls&&m.tool_calls.length){
+      const c=[];if(m.content)c.push({type:'text',text:m.content});
+      m.tool_calls.forEach(t=>{let i={};try{i=JSON.parse(t.function.arguments||'{}')}catch(e){}c.push({type:'tool_use',id:t.id,name:t.function.name,input:i})});
+      out.push({role:'assistant',content:c});continue;
+    }
+    out.push({role:m.role,content:m.content});
+  }
+  const body={model:p.m,max_tokens:max,system:sys,messages:out};
+  if(tools&&tools.length)body.tools=tools.map(t=>({name:t.function.name,description:t.function.description,input_schema:t.function.parameters}));
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':p.k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});
+  const j=await r.json();
+  if(!r.ok){const e=new Error('HTTP '+r.status+' '+((j.error&&(j.error.message||j.error.type))||j.message||''));e.status=r.status;throw e}
+  return {content:j.content.filter(b=>b.type==='text').map(b=>b.text).join(' ').trim(),tool_calls:j.content.filter(b=>b.type==='tool_use').map(b=>({id:b.id,type:'function',function:{name:b.name,arguments:JSON.stringify(b.input||{})}}))};
+}
+async function callProv(p,msgs,tools,max){
+  if(p.t==='a')return await callAnth(p,msgs,tools,max);
+  const body={model:p.m,messages:msgs.map(m=>(m.reasoning_content&&!/deepseek/.test(p.u))?Object.assign({},m,{reasoning_content:undefined}):m)};
+  body[/api\.openai\.com/.test(p.u)?'max_completion_tokens':'max_tokens']=max;
+  if(tools&&tools.length)body.tools=tools;
+  if(p.g&&/gpt-oss/.test(p.m))body.reasoning_effort='low';
+  const r=await fetch(p.u+'/chat/completions',{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+p.k},body:JSON.stringify(body)});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok){const e=new Error('HTTP '+r.status+' '+String((j.error&&(j.error.message||j.error))||j.message||''));e.status=r.status;throw e}
+  const m=j.choices[0].message;
+  return {content:(m.content||'').trim(),tool_calls:m.tool_calls||[],reasoning:m.reasoning_content||''};
+}
+async function chat(msgs,o){
+  o=o||{};const all=providers();
+  if(!all.length)throw new Error('No AI key set');
+  const ready=all.filter(p=>(cool[p.n]||0)<=Date.now()),errs=[];
+  for(const p of (ready.length?ready:all)){
+    try{const r=await callProv(p,msgs,o.tools,o.max||600);r.p=p;return r}
+    catch(e){errs.push(p.n+' → '+String(e.message).slice(0,150));cool[p.n]=Date.now()+coolFor(e)}
+  }
+  throw new Error('All AI models failed:\n'+errs.join('\n'));
+}
+async function llm(system,user,max){return (await chat([{role:'system',content:system},{role:'user',content:user}],{max:max||600})).content}
+const vmList=p=>p.t==='a'?[p.m]:[...new Set([p.v,p.g?'qwen/qwen3.8-27b':''].filter(Boolean))];
+async function vision(b64,q){
+  const errs=[];
+  for(const p of providers()){
+    for(const vm of vmList(p)){
+    try{
+      if(p.t==='a'){
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':p.k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:vm,max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:q}]}]})});
+        const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||r.status);
+        return j.content.map(b=>b.text||'').join('').trim();
+      }
+      for(const extra of (p.g?[{reasoning_effort:'none'},{}]:[{}])){
+        const r=await fetch(p.u+'/chat/completions',{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+p.k},body:JSON.stringify(Object.assign({model:vm,max_tokens:900,messages:[{role:'user',content:[{type:'text',text:q},{type:'image_url',image_url:{url:'data:image/jpeg;base64,'+b64}}]}]},extra))});
+        const j=await r.json();
+        if(r.ok)return (j.choices[0].message.content||'').trim().slice(0,2500);
+        if(extra.reasoning_effort===undefined)throw new Error(String((j.error&&(j.error.message||j.error))||r.status));
+      }
+    }catch(e){errs.push(p.n+' ('+vm+'): '+String(e.message).slice(0,80))}
+    }
+  }
+  throw new Error('No vision model worked ('+(errs.join(' | ')||'add a vision model to a provider')+')');
+}
+const MEMSYS="You maintain the long-term memory of an AI assistant about its user. Merge the CURRENT MEMORY with the NEW CONVERSATION EXCERPT. Keep durable facts: name, preferences, people, projects, plans, routines, decisions, and notable events with dates, plus a brief note of topics discussed. Drop small talk and anything outdated or contradicted. Maximum 350 words, plain text, no preamble.";
+let memBusy=0;
+async function memUpdate(old){
+  memBusy=1;
+  try{
+    const ex=old.map(m=>(m.role==='user'?'User: ':'Jarvis: ')+m.content).join('\n');
+    const t=await llm(MEMSYS,'Today: '+new Date().toDateString()+'\n\nCURRENT MEMORY:\n'+(mem()||'(empty)')+'\n\nNEW CONVERSATION EXCERPT:\n'+ex,1200);
+    if(t.length>10)localStorage.setItem('jm',t.slice(0,4000));else throw new Error('empty');
+  }catch(e){hist.unshift(...old);saveH()}
+  memBusy=0;
+}
+function condense(){
+  if(hist.length<=30||memBusy)return;
+  const old=hist.splice(0,hist.length-16);
+  while(hist.length&&hist[0].role!=='user')old.push(hist.shift());
+  saveH();memUpdate(old);
+}
+const Q=[];
+const b64s=ab=>{const u=new Uint8Array(ab);let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+async function flushQ(){while(Q.length){const f=Q.shift();try{await f()}catch(e){}}}
+async function searchRaw(q){
+  if(cfg.tk){
+    try{
+      const r=await fetch('https://api.tavily.com/search',{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+cfg.tk},body:JSON.stringify({query:q,search_depth:'basic',max_results:6,include_answer:true})});
+      const j=await r.json();if(!r.ok)throw new Error(JSON.stringify(j.detail||j).slice(0,100));
+      return ('Answer: '+(j.answer||'')+'\n'+(j.results||[]).map(x=>'- '+x.title+(x.published_date?' ['+x.published_date+']':'')+': '+(x.content||'').slice(0,350)).join('\n')).slice(0,2800);
+    }catch(e){}
+  }
+  const gp=providers().find(x=>x.g);if(!gp)throw new Error('Web search needs a Tavily key. Tell the user to add a free one in settings.');
+  const r=await fetch(GROQ,{method:'POST',headers:{'content-type':'application/json','Authorization':'Bearer '+gp.k},body:JSON.stringify({model:'groq/compound',messages:[{role:'user',content:'Search the web right now and answer with the latest facts and dates. Today is '+new Date().toDateString()+'. Question: '+q}]})});
+  const j=await r.json();if(!r.ok)throw new Error('Web search is unavailable ('+((j.error&&j.error.message)||r.status)+'). Tell the user to add a free Tavily key in settings.');
+  return (j.choices[0].message.content||'No result.').slice(0,2500);
+}
+let spTok={t:'',e:0};
+async function spToken(){
+  if(spTok.t&&Date.now()<spTok.e)return spTok.t;
+  const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Authorization':'Basic '+btoa(cfg.si+':'+cfg.ss),'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials'});
+  const j=await r.json();if(!r.ok)throw new Error(j.error_description||j.error||r.status);
+  spTok={t:j.access_token,e:Date.now()+(j.expires_in-60)*1000};return spTok.t;
+}
+async function spFind(q,kind){
+  const ty={song:'track',artist:'artist',album:'album',playlist:'playlist'}[kind]||'track';
+  const tk=await spToken();
+  const r=await fetch('https://api.spotify.com/v1/search?type='+ty+'&limit=5&q='+encodeURIComponent(q),{headers:{'Authorization':'Bearer '+tk}});
+  const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||r.status);
+  const it=((j[ty+'s']||{}).items||[]).filter(Boolean)[0];
+  if(!it)return null;
+  return {uri:it.uri,name:it.name,by:(it.artists||[]).map(x=>x.name).join(', ')||(it.owner&&it.owner.display_name)||''};
+}
+async function runTool(name,a){
+  try{
+    if(name==='web_search')return await search(a.query||'');
+    if(name==='notes'){
+      let L=J('jn')||[];
+      if(a.action==='add'){L.push({t:a.text||'',d:new Date().toLocaleString()});localStorage.setItem('jn',JSON.stringify(L));return 'Saved. The user can view notes with the NOTES button at the top left.'}
+      if(a.action==='clear'){localStorage.removeItem('jn');return 'Cleared.'}
+      return L.length?L.map((x,i)=>(i+1)+'. '+x.t+' ('+x.d+')').join('\n'):'No notes.';
+    }
+    const more=await runMore(name,a);if(more!==undefined)return more;
+    const n=NB();if(!n)return 'Phone actions only work in the installed app.';
+    const a11y=async()=>(await n.a11yStatus()).on;
+    const needA11y=()=>{Q.push(()=>n.openSettings({page:'accessibility'}));return 'Accessibility control is OFF, so this cannot be done automatically yet. Tell the user you are opening Accessibility settings and they must enable Jarvis there (Installed or Downloaded apps), then ask again.'};
+    if(name==='open_settings'){await n.openSettings({page:a.page});return 'Settings screen shown.'}
+    if(name==='device_control'){
+      if(a.setting==='flashlight'){await n.torch({on:a.state!=='off'});return 'Flashlight '+(a.state==='off'?'off':'on')+'.'}
+      if(a.setting==='volume'){await n.volume({percent:Math.max(0,Math.min(100,+a.percent||50))});return 'Volume set.'}
+      if(a.setting==='brightness'){const r=await n.setBrightness({percent:Math.max(0,Math.min(100,+a.percent||50))});return r.permissionRequired?'Android opened the Modify system settings permission page. Allow Jarvis, then repeat the brightness command.':'Brightness set to '+Math.max(0,Math.min(100,+a.percent||50))+' percent.'}
+      const pg={wifi:'wifi',bluetooth:'bluetooth',airplane_mode:'airplane',location:'location'}[a.setting];
+      if(!pg)return 'Unsupported setting.';
+      if(!(await a11y()))return needA11y();
+      Q.push(async()=>{await n.armTask({task:'toggle',arg:a.setting+'|'+(a.state==='off'?'off':'on'),ttl:12000});await n.openSettings({page:pg})});
+      return 'Queued: it will switch '+a.setting+' '+(a.state==='off'?'off':'on')+' right after you finish speaking.';
+    }
+    if(name==='spotify'){
+      if(a.action!=='play'){await n.mediaKey({key:a.action==='pause'?'pause':a.action==='resume'?'play':a.action});return 'Command sent.'}
+      let bgErr='';
+      try{const r=await n.spotifyBg({query:a.query||''});if(r.playing)return 'Playing now in the background'+(r.title&&r.title!=='null'?': '+r.title:'')+'. No app switch was needed.'}catch(e){bgErr=String((e&&e.message)||e)}
+      const hint=/notification/.test(bgErr)?' Also tell the user once: enabling Notification access for Jarvis in Android settings lets music start without opening Spotify.':'';
+      let apiNote='';
+      if(cfg.si&&cfg.ss){
+        try{
+          const f=await spFind(a.query||'',a.kind);
+          if(f){
+            const exact='spotify:search:'+encodeURIComponent(f.name+(f.by?' '+f.by:''));
+            if(await a11y())Q.push(async()=>{await n.armTask({task:'spotify',ttl:30000});await n.openUrl({url:exact,pkg:'com.spotify.music'})});
+            else Q.push(()=>n.openUrl({url:exact,pkg:'com.spotify.music'}));
+            return 'Queued: Spotify will play "'+f.name+'"'+(f.by?' by '+f.by:'')+' right after you finish speaking.'+(await a11y()?'':' (Auto-play needs Accessibility enabled.)');
+          }
+          apiNote=' (Spotify search found no exact match, so a normal search will open.)';
+        }catch(e){apiNote=' (Spotify lookup failed: '+String((e&&e.message)||e)+'; using normal search.)'}
+      }
+      const url='spotify:search:'+encodeURIComponent(a.query||'');
+      if(await a11y())Q.push(async()=>{await n.armTask({task:'spotify',ttl:30000});await n.openUrl({url,pkg:'com.spotify.music'})});
+      else Q.push(()=>n.openUrl({url,pkg:'com.spotify.music'}));
+      return 'Queued: Spotify will open and start playing '+a.query+' right after you finish speaking.'+(await a11y()?'':' (Auto-play needs Accessibility enabled; for now it only opens the search.)')+hint+apiNote;
+    }
+    if(name==='set_reminder'){
+      const lab=(a.label||'Reminder').slice(0,80);let at;
+      if(a.minutes)at=Date.now()+Math.round(a.minutes*60000);else{const d=new Date(a.time);if(isNaN(d))return 'Invalid time.';at=d.getTime()}
+      if(at<=Date.now()+2000)return 'That time has already passed.';
+      const speech=(a.speech||('Sir, a reminder: '+lab+'.')).slice(0,160);
+      let audio='';try{audio=b64s(await ttsBytes({text:speech,format:'mp3',latency:'balanced'}))}catch(e){}
+      try{await n.requestNotifPermission()}catch(e){}
+      const id=String(at);await n.scheduleReminder({id,at,title:lab,text:speech,audio});
+      const L=(J('jr')||[]).filter(x=>x.at>Date.now());L.push({id,at,label:lab});localStorage.setItem('jr',JSON.stringify(L));
+      return 'Reminder saved for '+new Date(at).toLocaleString()+'. Jarvis will say it aloud then'+(audio?'':' using the phone voice (the cloud voice was unavailable)')+'.';
+    }
+    if(name==='add_calendar_event'){
+      const s=new Date(a.start).getTime();if(isNaN(s))return 'Invalid start time.';
+      await n.addEvent({title:a.title,start:s,end:s+(a.minutes||60)*60000,location:a.location||''});return 'Calendar editor opened; the user must tap Save.';
+    }
+    if(name==='whatsapp'){
+      const lim=+cfg.wl||5,day=new Date().toDateString();let u=J('jw');if(!u||u.d!==day)u={d:day,n:0};
+      if(u.n>=lim)return 'Daily WhatsApp limit of '+lim+' reached.';
+      const map={};(cfg.wc||'').split(',').forEach(p=>{const [k,v]=p.split('=');if(v)map[k.trim().toLowerCase()]=v.replace(/\D/g,'')});
+      const num=map[(a.contact||'').trim().toLowerCase()];
+      if(!num)return 'Contact not allowed. Allowed contacts: '+(Object.keys(map).join(', ')||'none');
+      if(!(await a11y()))return needA11y();
+      u.n++;localStorage.setItem('jw',JSON.stringify(u));
+      Q.push(async()=>{await n.armTask({task:'wa_send',ttl:25000});await n.openUrl({url:'https://wa.me/'+num+'?text='+encodeURIComponent(a.message||''),pkg:'com.whatsapp'})});
+      return 'Queued: the message will be sent right after you finish speaking.';
+    }
+  }catch(e){return 'Failed: '+e.message}
+  return 'Unknown tool.';
+}
+const MORE=[
+ fn('weather','Weather now and a 3-day forecast for a city (omit city to use the home city).',{city:S},[]),
+ fn('calculate','Exact math for any arithmetic. Write percentages as decimals (15% of 200 is 0.15*200).',{expression:S},['expression']),
+ fn('tasks','To-do list: add (optional due as local YYYY-MM-DDTHH:MM, which also sets an alarm), list, complete, remove.',{action:{type:'string',enum:['add','list','complete','remove']},text:S,due:S},['action']),
+ fn('knowledge','Pinned facts that must always be remembered about the user or world: add, list, or forget (text matches).',{action:{type:'string',enum:['add','list','forget']},text:S},['action']),
+ fn('custom_commands','The user’s own voice shortcuts: save (name and instructions), delete, list.',{action:{type:'string',enum:['save','delete','list']},name:S,instructions:S},['action']),
+ fn('plugins','Webhook plugins that add new abilities: add (name, description, https url), remove, list.',{action:{type:'string',enum:['add','remove','list']},name:S,description:S,url:S},['action']),
+ fn('smart_home','Home Assistant: list finds entities matching query; call runs a service such as light/turn_on on an entity_id.',{action:{type:'string',enum:['list','call']},query:S,domain:S,service:S,entity_id:S},['action']),
+ fn('compose_email','Open a drafted email for the user to review and send.',{to:S,subject:S,body:S},['subject','body']),
+ fn('clipboard','Read or write the phone clipboard.',{action:{type:'string',enum:['read','write']},text:S},['action']),
+ fn('notifications','Read current notifications, or clear all notifications only after the user explicitly confirms.',{action:{type:'string',enum:['read','clear']}},['action']),
+ fn('device_status','Battery, charging, network, RAM and storage of this phone.',{},[]),
+ fn('device_capabilities','Check which Android permissions and integrations Jarvis currently has enabled: Accessibility, notification access, modify-system-settings, shared-file access, microphone permission and Shizuku.',{},[]),
+ fn('shizuku_status','Check whether the Shizuku service is running and whether Jarvis has been granted Shizuku API permission. This is read-only.',{},[]),
+ fn('shizuku_request_access','Request Shizuku API permission for Jarvis. Only call this when the user explicitly asks to connect or authorize Shizuku.',{},[]),
+ fn('volume_status','Read the current media volume level as a percentage.',{},[]),
+ fn('analyze_screen','Look at the phone screen and answer a question about it.',{question:S},[])
+];
+const plugins=()=>J('jx')||[];
+const allTools=()=>[...TOOLS,...MORE,...MORE2,...MORE3,...plugins().map(p=>fn('plugin_'+p.n,p.d,{input:S},[]))];
+let ctxLine='';
+const fmtStatus=s=>'Battery '+s.battery+'%'+(s.charging?' (charging)':'')+', '+s.tempC+'°C; network '+s.network+(s.downKbps?' (~'+Math.round(s.downKbps/1000)+' Mbps link)':'')+'; RAM '+s.ramFreeMB+' of '+s.ramTotalMB+' MB free; storage '+(+s.storageFreeGB).toFixed(1)+' of '+(+s.storageTotalGB).toFixed(1)+' GB free.';
+async function refreshCtx(){const n=NB();if(!n)return null;try{const s=await n.status();ctxLine=' Phone: battery '+s.battery+'%'+(s.charging?' charging':'')+', network '+s.network+'.';paintStatus(s);return s}catch(e){return null}}
+function calc(e){
+  const s=String(e).toLowerCase().replace(/\^/g,'**');
+  if(!/^[0-9+\-*/().,%\s]*$/.test(s.replace(/\b(sqrt|sin|cos|tan|log|ln|exp|abs|round|floor|ceil|min|max|pow|pi|e)\b/g,'')))throw new Error('unsupported expression');
+  const js=s.replace(/\blog\b/g,'Math.log10').replace(/\bln\b/g,'Math.log').replace(/\b(sqrt|sin|cos|tan|exp|abs|round|floor|ceil|min|max|pow)\b/g,'Math.$1').replace(/\bpi\b/g,'Math.PI').replace(/\be\b/g,'Math.E');
+  const v=Function('"use strict";return ('+js+')')();
+  if(typeof v!=='number'||!isFinite(v))throw new Error('not a number');
+  return +v.toPrecision(12);
+}
+async function weather(city){
+  const q=city||cfg.hc;if(!q)return 'No city given. Ask the user for a city, or tell them to set a Home city in settings.';
+  const g=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name='+encodeURIComponent(q))).json();
+  const p=(g.results||[])[0];if(!p)return 'City not found.';
+  const w=await (await fetch('https://api.open-meteo.com/v1/forecast?latitude='+p.latitude+'&longitude='+p.longitude+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto&forecast_days=3')).json();
+  const W=c=>c===0?'clear':c<4?'partly cloudy':c<50?'fog':c<60?'drizzle':c<70?'rain':c<80?'snow':c<90?'showers':'thunderstorms';
+  const c=w.current,d=w.daily;
+  return p.name+' now: '+c.temperature_2m+'°C (feels '+c.apparent_temperature+'), '+W(c.weather_code)+', humidity '+c.relative_humidity_2m+'%, wind '+c.wind_speed_10m+' km/h. Forecast: '+d.time.map((t,i)=>t+' '+d.temperature_2m_min[i]+'-'+d.temperature_2m_max[i]+'°C, '+W(d.weather_code[i])+', rain chance '+d.precipitation_probability_max[i]+'%').join('; ')+'.';
+}
+async function home(a){
+  if(!cfg.hu||!cfg.ht)return 'Home Assistant is not set up. Tell the user to add its URL and token in settings.';
+  const base=cfg.hu.replace(/\/+$/,''),H={'Authorization':'Bearer '+cfg.ht,'content-type':'application/json'};
+  if(a.action==='list'){
+    const r=await fetch(base+'/api/states',{headers:H});if(!r.ok)throw new Error('Home Assistant '+r.status);
+    const L=await r.json(),q=(a.query||'').toLowerCase();
+    return L.filter(s=>!q||s.entity_id.includes(q)||String((s.attributes||{}).friendly_name||'').toLowerCase().includes(q)).slice(0,20).map(s=>s.entity_id+' ('+((s.attributes||{}).friendly_name||'')+') = '+s.state).join('\n')||'No match.';
+  }
+  if(!a.domain||!a.service)return 'Need a domain and a service.';
+  const body={};if(a.entity_id)body.entity_id=a.entity_id;
+  const r=await fetch(base+'/api/services/'+a.domain+'/'+a.service,{method:'POST',headers:H,body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('Home Assistant '+r.status);
+  return 'Command accepted by Home Assistant.';
+}
+async function runMore(name,a){
+  const m2=await runMore2(name,a);if(m2!==undefined)return m2;
+  const sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  if(name==='weather')return await weather(a.city);
+  if(name==='calculate'){try{return String(calc(a.expression))}catch(e){return 'Cannot compute: '+e.message}}
+  if(name==='tasks'){
+    let L=J('jt')||[];
+    if(a.action==='add'){L.push({t:a.text||'',due:a.due||'',done:0});sv('jt',L);return 'Task added.'+(a.due?' '+await runTool('set_reminder',{label:a.text,time:a.due}):'')}
+    if(a.action==='complete'||a.action==='remove'){const i=L.findIndex(x=>x.t.toLowerCase().includes((a.text||'').toLowerCase()));if(i<0)return 'No matching task.';if(a.action==='complete')L[i].done=1;else L.splice(i,1);sv('jt',L);return 'Updated.'}
+    return L.length?L.map((x,i)=>(i+1)+'. '+(x.done?'[finished] ':'')+x.t+(x.due?' (due '+x.due+')':'')).join('\n'):'No tasks.';
+  }
+  if(name==='knowledge'){
+    let L=J('jk')||[];
+    if(a.action==='add'){L.push(a.text||'');sv('jk',L);return 'Pinned.'}
+    if(a.action==='forget'){const c0=L.length;L=L.filter(x=>!x.toLowerCase().includes((a.text||'').toLowerCase()));sv('jk',L);return 'Removed '+(c0-L.length)+' item(s).'}
+    return L.length?L.join('\n'):'Nothing pinned.';
+  }
+  if(name==='custom_commands'){
+    let L=J('jc')||[];const k=(a.name||'').toLowerCase();
+    if(a.action==='save'){L=L.filter(x=>x.n.toLowerCase()!==k);L.push({n:a.name||'',i:a.instructions||''});sv('jc',L);return 'Command saved.'}
+    if(a.action==='delete'){L=L.filter(x=>x.n.toLowerCase()!==k);sv('jc',L);return 'Command deleted.'}
+    return L.length?L.map(x=>x.n+': '+x.i).join('\n'):'No custom commands.';
+  }
+  if(name==='plugins'){
+    let L=plugins();const nm=(a.name||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').slice(0,30);
+    if(a.action==='add'){if(!nm||!/^https:\/\//.test(a.url||''))return 'A name and an https URL are required.';L=L.filter(x=>x.n!==nm);L.push({n:nm,d:(a.description||nm).slice(0,200),u:a.url});sv('jx',L);return 'Plugin '+nm+' added; usable from the next message.'}
+    if(a.action==='remove'){L=L.filter(x=>x.n!==nm);sv('jx',L);return 'Plugin removed.'}
+    return L.length?L.map(x=>x.n+': '+x.d).join('\n'):'No plugins.';
+  }
+  if(name.startsWith('plugin_')){
+    const p=plugins().find(x=>'plugin_'+x.n===name);if(!p)return 'Unknown plugin.';
+    const r=await fetch(p.u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({input:a.input||'',time:new Date().toISOString()})});
+    return (await r.text()).slice(0,1500);
+  }
+  if(name==='smart_home')return await home(a);
+  const n=NB(),no='This only works in the installed app.';
+  if(name==='compose_email'){if(!n)return no;Q.push(()=>n.openUrl({url:'mailto:'+encodeURIComponent(a.to||'')+'?subject='+encodeURIComponent(a.subject||'')+'&body='+encodeURIComponent(a.body||'')}));return 'The email draft will open for the user to review and send.'}
+  if(name==='device_status'){if(!n)return no;return fmtStatus(await n.status())}
+  if(name==='device_capabilities'){
+    if(!n)return no;
+    try{
+      const c=await n.capabilities();
+      return 'Android '+c.androidVersion+' (SDK '+c.sdk+'). Permissions: Accessibility '+(c.accessibility?'ON':'OFF')+'; notification access '+(c.notificationAccess?'ON':'OFF')+'; modify system settings '+(c.modifySystemSettings?'ON':'OFF')+'; all-files access '+(c.allFilesAccess?'ON':'OFF')+'; microphone permission '+(c.microphonePermission?'ON':'OFF')+'; Shizuku '+(c.shizukuAvailable?(c.shizukuPermission?'CONNECTED + AUTHORIZED':'CONNECTED, NOT AUTHORIZED'):'OFFLINE')+'.';
+    }catch(e){return 'Could not inspect Android permissions: '+String((e&&e.message)||e)}
+  }
+  if(name==='shizuku_status'){
+    if(!n)return no;
+    try{
+      const s=await n.shizukuStatus();
+      if(!s.available)return 'Shizuku service is not connected. Open Shizuku and make sure its status is Running.';
+      return 'Shizuku is connected. Jarvis API permission: '+(s.permissionGranted?'GRANTED':'NOT GRANTED')+'. Backend identity: '+s.privilege+' (UID '+s.uid+').';
+    }catch(e){return 'Could not check Shizuku: '+String((e&&e.message)||e)}
+  }
+  if(name==='shizuku_request_access'){
+    if(!n)return no;
+    try{
+      const r=await n.requestShizukuPermission();
+      return r.granted?'Shizuku permission granted to Jarvis.':'Shizuku permission was not granted.';
+    }catch(e){return 'Shizuku authorization failed: '+String((e&&e.message)||e)}
+  }
+  if(name==='volume_status'){
+    if(!n)return no;
+    try{const v=await n.volumeStatus();return 'Media volume is '+v.percent+'% ('+v.current+'/'+v.max+').'+(v.muted?' It is muted.':'')}
+    catch(e){return 'Could not read volume: '+String((e&&e.message)||e)}
+  }
+  if(name==='clipboard'){if(!n)return no;if(a.action==='write'){await n.clipSet({text:a.text||''});return 'Copied to the clipboard.'}return (await n.clipGet()).text||'The clipboard is empty.'}
+  if(name==='notifications'){
+    if(!n)return no;
+    try{
+      if(a.action==='clear'){
+        if(!pendNotifClear||pendNotifClear.turn+1!==turn){pendNotifClear={turn};return 'Nothing cleared. Ask the user to explicitly confirm clearing all current notifications in their next message.'}
+        if(!explicitConfirm(lastUserText)){pendNotifClear=null;return 'Nothing cleared. The confirmation was not explicit; ask again only if the user still wants this.'}
+        pendNotifClear=null;await n.clearNotifs();return 'Notifications cleared.'
+      }
+      const r=await n.notifs();return r.list.length?r.list.join('\n'):'No notifications.'
+    }catch(e){return 'Notification access is off. Tell the user to enable it for Jarvis in Android settings.'}
+  }
+  if(name==='analyze_screen'){
+    if(!n)return no;
+    let r;try{r=await n.screenshot()}catch(e){return 'Could not capture the screen: '+String((e&&e.message)||e)+'. Tell the user Accessibility must be on, and for the best result to open Jarvis from the home gesture with Use screenshot enabled.'}
+    const ans=await vision(r.b64,a.question||'Describe what is on this screen and what matters.');setPrev('📱 Screen',null,r.b64);return ans;
+  }
+}
+function localSpeak(text){return new Promise(res=>{try{
+  const u=new SpeechSynthesisUtterance(text);let done=false;
+  const fin=()=>{if(!done){done=true;fakeVoice=false;res()}};
+  u.onend=u.onerror=fin;
+  u.onboundary=e=>{if(e.name&&e.name!=='word')return;const i=KJ.starts.findIndex((s,j)=>s<=e.charIndex&&(KJ.starts[j+1]===undefined||KJ.starts[j+1]>e.charIndex));if(i>=0){KJ.t0=KJ.clk()-((KJ.cum[i-1]||0)/KJ.tot)*KJ.dur;kSet(i)}};
+  setMode('speaking');fakeVoice=true;kStart(Math.max(1,text.length*.075),()=>performance.now()/1000);
+  speechSynthesis.speak(u);setTimeout(fin,Math.max(8000,text.length*140));
+}catch(e){fakeVoice=false;res()}})}
+const logH=(r,t)=>{const L=J('jl')||[];L.push({r,t:String(t).slice(0,500),d:new Date().toLocaleString()});try{localStorage.setItem('jl',JSON.stringify(L.slice(-400)))}catch(e){}};
+async function offline(t){
+  const n=NB(),x=t.toLowerCase();let m;
+  if(n&&/(flashlight|senter|torch)/.test(x)){const on=!/\b(off|mati|matikan)\b/.test(x);await n.torch({on});return 'Flashlight '+(on?'on':'off')+'.'}
+  if(n&&(m=x.match(/volume\D*(\d{1,3})/))){const p=Math.min(100,+m[1]);await n.volume({percent:p});return 'Volume at '+p+' percent.'}
+  if(n&&/(timer|remind|ingat)/.test(x)&&(m=x.match(/(\d+)\s*(minute|min|menit)/))){Q.push(()=>n.setTimer({seconds:+m[1]*60,label:'Jarvis'}));return 'Timer set for '+m[1]+' minutes.'}
+  if((m=t.match(/^(?:note|catat|catatan)[:\s]+(.+)/i))){const L=J('jn')||[];L.push({t:m[1],d:new Date().toLocaleString()});localStorage.setItem('jn',JSON.stringify(L));return 'Note saved.'}
+  if(n&&/(battery|baterai|network|jaringan|storage|memory)/.test(x))return fmtStatus(await n.status());
+  if(/(what time|jam berapa)/.test(x))return 'It is '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'.';
+  if(/(what.*date|tanggal|hari apa)/.test(x))return new Date().toDateString()+'.';
+  if(/^[\d\s+\-*/().^%]+$/.test(x))try{return String(calc(x))}catch(e){}
+  return null;
+}
+async function finishLocal(o){hist.push({role:'assistant',content:o});saveH();logH('a',o);say(o);await speak(o);await flushQ()}
+let warned=0;
+setInterval(async()=>{if(document.hidden||mode!=='idle')return;const s=await refreshCtx();if(!s)return;if(s.battery<=15&&!s.charging&&!warned){warned=1;const m='Battery is at '+s.battery+' percent, sir. You may want to charge.';say(m);speak(m)}else if(s.charging||s.battery>30)warned=0},60000);
+const MORE2=[
+ fn('reminders','List or cancel upcoming reminders (cancel by id or by words from the label).',{action:{type:'string',enum:['list','cancel']},id:S,query:S},['action']),
+ fn('read_screen','Read all text currently visible on the phone screen (works best when Jarvis is opened as the floating assistant over an app).',{},[]),
+ fn('ui_control','Control the phone UI: tap or long-press a visible element by text, tap screen coordinates, scroll, type into a focused non-password field, inspect the visible UI tree, or use supported Android navigation actions.',{action:{type:'string',enum:['tap','long_press','tap_at','type','scroll','describe','home','back','recents','notifications','quick_settings','power_menu','lock_screen','screenshot']},text:S,direction:{type:'string',enum:['up','down']},x:{type:'number'},y:{type:'number'}},['action']),
+ fn('open_app','Open an installed app by name.',{name:S},['name']),
+ fn('files','Manage files in shared storage: list, read, search, write (new files or append), move, delete (the user must confirm in a later message).',{action:{type:'string',enum:['list','read','search','write','move','delete']},path:S,to:S,query:S,text:S,append:{type:'boolean'}},['action']),
+ fn('read_document','Load a PDF, DOCX or text file from shared storage so questions can be answered about it; clear:true forgets the loaded document.',{path:S,clear:{type:'boolean'}},[]),
+ fn('delegate','Hand a sub-task to a specialist agent and use its result: researcher (web research), coder, writer, planner or critic.',{role:{type:'string',enum:['researcher','coder','writer','planner','critic']},task:S},['role','task'])
+];
+const ROLES={researcher:'You are a meticulous research analyst. From the web results given, write accurate findings with dates. Say when something is uncertain.',coder:'You are an expert software engineer. Produce correct, minimal, commented code and note edge cases.',writer:'You are an excellent writer. Produce polished, concise text in the requested tone.',planner:'You are a strategic planner. Produce a clear numbered plan with priorities and risks.',critic:'You are a rigorous reviewer. Find errors, gaps and risks, then suggest fixes.'};
+async function delegate(role,task){
+  const r=ROLES[role]?role:'planner';let c='';
+  if(r==='researcher'){try{c='\n\nWEB RESULTS:\n'+await search(task)}catch(e){}}
+  return (await llm(ROLES[r],task+c,900)).slice(0,3000);
+}
+let curDoc=null,appsCache=null,pendDel=null,pendNotifClear=null,turn=0,lastUserText='';
+const explicitConfirm=t=>/^(?:yes|yep|confirm(?:ed)?|iya|ya|oke|ok|setuju|lanjut|hapus(?:\s+(?:itu|file|sekarang|aja))?|bersihkan(?:\s+(?:notifikasi|semua))?)[.! ]*$/i.test(String(t||'').trim());
+const loadScript=u=>new Promise((res,rej)=>{if(document.querySelector('script[src="'+u+'"]'))return res();const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('Could not load '+u));document.head.appendChild(s)});
+async function docText(name,buf){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  if(ext==='pdf'){
+    const V='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    await loadScript(V+'pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc=V+'pdf.worker.min.js';
+    const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;let t='';
+    for(let i=1;i<=Math.min(pdf.numPages,40);i++){const pg=await pdf.getPage(i);t+=(await pg.getTextContent()).items.map(x=>x.str).join(' ')+'\n'}
+    return t;
+  }
+  if(ext==='docx'){await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');return (await mammoth.extractRawText({arrayBuffer:buf})).value}
+  return new TextDecoder().decode(buf);
+}
+const b64buf=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer};
+async function runMore2(name,a){
+  const pl=await runPlug(name,a);if(pl!==undefined)return pl;
+  const n=NB(),no='This only works in the installed app.';
+  if(name==='delegate')return await delegate(a.role,a.task||'');
+  if(name==='read_document'){
+    if(a.clear){curDoc=null;return 'Document forgotten.'}
+    if(!n)return no;
+    const r=await n.fsReadB64({path:a.path||''});
+    const t=(await docText(a.path||'file.txt',b64buf(r.b64))).replace(/\s+\n/g,'\n').trim();
+    if(!t)return 'No readable text found (maybe a scanned PDF).';
+    curDoc={name:(a.path||'').split('/').pop(),text:t.slice(0,40000)};
+    return 'Document loaded ('+t.length+' characters). Beginning:\n'+t.slice(0,6000);
+  }
+  if(name==='reminders'){
+    let L=(J('jr')||[]).filter(x=>x.at>Date.now());
+    if(a.action==='list')return L.length?L.map(x=>x.id+': '+x.label+' at '+new Date(x.at).toLocaleString()).join('\n'):'No upcoming reminders.';
+    const q=(a.query||'').toLowerCase(),m=L.filter(x=>x.id===a.id||(q&&x.label.toLowerCase().includes(q)));
+    if(!m.length)return 'No matching reminder.';
+    if(n)for(const x of m)await n.cancelReminder({id:x.id});
+    localStorage.setItem('jr',JSON.stringify(L.filter(x=>!m.includes(x))));return 'Cancelled '+m.length+' reminder(s).';
+  }
+  if(!['read_screen','ui_control','open_app','files'].includes(name))return undefined;
+  if(!n)return no;
+  if(name==='read_screen'){try{return (await n.readScreen()).text||'Nothing readable on screen.'}catch(e){return 'Cannot read the screen: Accessibility is off.'}}
+  if(name==='ui_control'){
+    try{
+      if(a.action==='tap'){await n.tapText({text:a.text||''});return 'Tapped the matching visible element.'}
+      if(a.action==='long_press'){await n.longClickText({text:a.text||''});return 'Long-pressed the matching visible element.'}
+      if(a.action==='tap_at'){if(typeof a.x!=='number'||typeof a.y!=='number')return 'Need numeric x and y screen coordinates.';await n.tapPoint({x:a.x,y:a.y});return 'Tapped the requested screen position.'}
+      if(a.action==='type'){await n.typeText({text:a.text||''});return 'Typed into the focused field.'}
+      if(a.action==='scroll'){await n.scrollScreen({direction:a.direction||'down'});return 'Scrolled '+(a.direction||'down')+'.'}
+      if(a.action==='describe'){const r=await n.screenTree();return r.tree||'No accessible UI elements found.'}
+      await n.globalAction({action:a.action});return 'Action sent.';
+    }catch(e){return 'Failed: '+String((e&&e.message)||e)+'. Accessibility must be on, and Jarvis should be the floating assistant over the app.'}
+  }
+  if(name==='open_app'){
+    if(!appsCache)appsCache=(await n.listApps()).apps;
+    const q=(a.name||'').toLowerCase();
+    let m=appsCache.filter(x=>x.label.toLowerCase()===q);
+    if(!m.length)m=appsCache.filter(x=>x.label.toLowerCase().includes(q));
+    if(!m.length)return 'No installed app matches "'+a.name+'".';
+    const ex=m.find(x=>x.label.toLowerCase()===q);
+    if(m.length>1&&!ex)return 'Several apps match: '+m.slice(0,6).map(x=>x.label).join(', ')+'. Ask which one.';
+    const app=ex||m[0];Q.push(()=>n.launchApp({pkg:app.pkg}));return 'Opening '+app.label+' after you finish speaking.';
+  }
+  if(name==='files'){
+    if(!(await n.fsStatus()).ok){Q.push(()=>n.openFilesAccess());return 'File access is off. Tell the user you are opening the permission screen and they must allow all files access for Jarvis, then ask again.'}
+    const p=a.path||'';
+    if(a.action==='list'){const r=await n.fsList({path:p});return r.items.map(x=>(x.dir?'[folder] ':'')+x.name+(x.dir?'':' ('+Math.round(x.size/1024)+' KB)')).join('\n')||'Empty folder.'}
+    if(a.action==='read')return (await n.fsRead({path:p,max:12000})).text||'Empty file.';
+    if(a.action==='search')return (await n.fsSearch({path:p,query:(a.query||'').toLowerCase()})).list.join('\n')||'No match.';
+    if(a.action==='write'){await n.fsWrite({path:p,text:a.text||'',append:!!a.append});return 'File saved.'}
+    if(a.action==='move'){await n.fsMove({from:p,to:a.to||''});return 'Moved.'}
+    if(a.action==='delete'){
+      if(!pendDel||pendDel.path!==p||pendDel.turn+1!==turn){pendDel={path:p,turn};return 'Not deleted yet. Ask the user to confirm deleting '+p+' in their next message.'}
+      if(!explicitConfirm(lastUserText)){pendDel=null;return 'File was not deleted because the next message was not an explicit confirmation.'}
+      pendDel=null;await n.fsDelete({path:p});return 'File deleted.';
+    }
+  }
+}
+const imgToB64=f=>new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const k=Math.min(1,1024/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.7).split(',')[1])};im.onerror=()=>rej(new Error('Could not read the image'));im.src=u});
+async function askImage(f){
+  if(mode!=='idle')return;
+  const q=$('txt').value.trim()||'Describe this image and point out anything important. Do not identify real people from their faces.';$('txt').value='';
+  archive();$('me').textContent='📷 '+(q.length>60?q.slice(0,60)+'…':q);setMode('thinking');say('Looking…');
+  try{const b64=await imgToB64(f);const out=await vision(b64,q);setPrev('📷 Photo',null,b64);hist.push({role:'user',content:'[sent a photo] '+q},{role:'assistant',content:out});saveH();logH('u','[photo] '+q);logH('a',out);say(out);await speak(out)}
+  catch(e){say('Vision error: '+e.message);setMode('idle')}
+}
+async function askDoc(f){
+  if(mode!=='idle')return;
+  archive();setMode('thinking');say('Reading '+f.name+'…');
+  try{
+    const t=(await docText(f.name,await f.arrayBuffer())).replace(/\s+\n/g,'\n').trim();
+    if(!t)throw new Error('no readable text found (maybe a scanned PDF)');
+    curDoc={name:f.name,text:t.slice(0,40000)};setMode('idle');
+    await ask('I loaded the document "'+f.name+'". Give me a short summary.');
+  }catch(e){say('Document error: '+e.message);setMode('idle')}
+}
+$('cam').onclick=()=>{if(!cfg.ak)return openCfg();$('fc').click()};
+$('atc').onclick=()=>{if(!cfg.ak)return openCfg();$('fa').click()};
+$('fc').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)askImage(f)};
+$('fa').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;/^image\//.test(f.type)?askImage(f):askDoc(f)};
+const GROUPS=[
+ [/(spotify|\bplay|putar|lagu|song|music|musik|pause|jeda|skip|next|previous|album|artist|playlist)/i,['spotify']],
+ [/(shizuku|wifi|wi-fi|bluetooth|airplane|pesawat|lokasi|location|flash|senter|torch|volume|brightness|kecerahan|setting|pengaturan|baterai|battery|jaringan|network|signal|\bram\b|storage|penyimpanan|status)/i,['open_settings','device_control','device_status','device_capabilities','volume_status']],
+ [/(buka|open|launch|jalankan|aplikasi|\bapp\b|lock|kunci|screenshot|tangkap|layar|screen|tap|ketuk|klik|click|long.?press|tekan lama|scroll|gulir|geser|ketik|type|home|back|kembali|recent|notif|panel|quick|power|salin|copy|clipboard|tempel|paste|elemen layar|ui tree)/i,['open_app','ui_control','read_screen','analyze_screen','clipboard','notifications']],
+ [/(remind|ingat|alarm|timer|calendar|kalender|jadwal|schedule|meeting|rapat|acara|event|task|tugas|todo|besok|tomorrow|nanti|jam\s*\d|\d{1,2}[:.]\d{2}|menit|minute|detik|hour)/i,['set_reminder','reminders','add_calendar_event','tasks']],
+ [/(note|catat|catatan|remember|ingat|forget|lupa|command|perintah|shortcut|plugin|\bpin|fakta)/i,['notes','knowledge','custom_commands','plugins']],
+ [/(email|e-mail|mail|surel|gmail)/i,['compose_email']],
+ [/(weather|cuaca|hujan|rain|panas|suhu|temperature|forecast|ramalan|briefing)/i,['weather','device_status','tasks','notes']],
+ [/(lamp|lampu|\blight|home assistant|\bac\b|kipas|\bfan\b|saklar|switch|smart|rumah|pintu|door|tirai|curtain|thermostat)/i,['smart_home']],
+ [/(file|folder|download|unduh|berkas|dokumen|document|pdf|docx|storage|penyimpanan)/i,['files','read_document']],
+ [/(skill|superpower|plugin|connector|connect|mcp|figma|canva|notion|linear|github|omniroute|install|sign in|login)/i,['connectors','skills']],
+ [/(research|riset|analy|analisis|code|kode|coding|program|script|write|tulis|essay|plan|rencana|review|critique)/i,['delegate']],
+ [/(\d\s*[-+*/x×÷^%]\s*\d|calculate|hitung|berapa|convert|konversi|sqrt|\bakar\b|persen|percent)/i,['calculate']]
+];
+let prevTools=[];
+function pickTools(text){
+  const all=allTools(),want=new Set(['web_search',...prevTools]);
+  GROUPS.forEach(g=>{if(g[0].test(text))g[1].forEach(n=>want.add(n))});
+  if(skills().length)want.add('use_skill');
+  return all.filter(t=>want.has(t.function.name)||t.function.name.startsWith('plugin_')).concat(mcpDefs(text,prevTools));
+}
+/* ---------- UI: theme, status strip, feed, chips, preview, device panel ---------- */
+function applyFs(){document.documentElement.style.setProperty('--fs',(+cfg.fs||16)+'px')}
+function applyTint(){document.documentElement.dataset.tint=cfg.ct||'cyan';document.documentElement.classList.toggle('lite',cfg.fx==='lite')}
+applyTint();applyFs();
+function paintTime(){$('tm').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+function paintStatus(s){if(!s)return;$('bt').textContent=(s.charging?'⚡':'🔋')+s.battery+'%';$('nw').textContent=s.network==='wifi'?'Wi‑Fi':s.network==='cellular'?'Mobile':s.network==='none'?'Offline':String(s.network)}
+async function paintWx(){
+  if(!cfg.hc)return;
+  try{
+    const g=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name='+encodeURIComponent(cfg.hc))).json(),p=(g.results||[])[0];if(!p)return;
+    const w=await (await fetch('https://api.open-meteo.com/v1/forecast?latitude='+p.latitude+'&longitude='+p.longitude+'&current=temperature_2m,weather_code')).json(),c=w.current.weather_code;
+    $('wx').textContent=Math.round(w.current.temperature_2m)+'° '+(c===0?'☀':c<4?'⛅':c<50?'🌫':c<70?'🌧':c<80?'❄':c<90?'🌦':'⛈');
+  }catch(e){}
+}
+paintTime();setInterval(paintTime,15000);paintWx();setInterval(paintWx,1800000);
+
+const pbub=(role,t)=>{const d=document.createElement('div');d.className='pb '+(role==='user'?'u':'a');d.textContent=String(t);return d};
+function archive(){
+  const f=$('pfeed');
+  if(f&&document.body.classList.contains('pop')){const m=$('me').textContent.trim(),a=$('ai').textContent.trim();if(m){f.appendChild(pbub('user',m));if(a)f.appendChild(pbub('assistant',a));while(f.children.length>14)f.firstChild.remove()}}
+  $('me').textContent='';$('prev').className='';$('prev').textContent='';$('sugg').textContent='';
+}
+function popSetup(){
+  const col=document.createElement('div');col.id='pchat';const feed=document.createElement('div');feed.id='pfeed';
+  col.append(feed,$('me'),$('ai'));document.body.insertBefore(col,$('dock'));
+  $('me').className='pb u';$('ai').className='pb a';
+  hist.slice(-6).forEach(m=>feed.appendChild(pbub(m.role,m.content)));
+  new MutationObserver(()=>{col.scrollTop=col.scrollHeight}).observe(col,{childList:true,subtree:true,characterData:true});
+  col.scrollTop=col.scrollHeight;
+}
+
+const DEF_Q=['☀ Weather | Give me today’s weather and forecast.','🔋 Phone | How is my phone doing?','🗞 News | What are the top headlines today?','⏰ Remind | Remind me to …','📝 Note | Note: …','🌐 Translate | Translate to English: …','🧮 Calc | Calculate …','📋 Briefing | Give me my briefing.'];
+function qlist(){const L=(cfg.qa||'').split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(p=>p[0]&&p[1]);return L.length?L:DEF_Q.map(l=>l.split('|').map(x=>x.trim()))}
+function runChip(p){if(!cfg.ak||!cfg.fk)return openCfg();if(mode!=='idle')return;if(/…$/.test(p)){$('txt').value=p.slice(0,-1);syncMic();$('txt').focus()}else ask(p)}
+function mkChip(label,fn){const b=document.createElement('button');b.className='chip';b.textContent=label;b.onclick=fn;return b}
+function renderChips(){const box=$('chips');box.textContent='';qlist().forEach(([l,p])=>box.appendChild(mkChip(l,()=>runChip(p))));box.appendChild(mkChip('＋',openCfg))}
+renderChips();
+
+const SUG={weather:['Will it rain tomorrow?','Remind me to take an umbrella…'],spotify:['Next song','Pause the music','Volume 40 percent'],set_reminder:['Show my tasks','Another reminder…'],tasks:['Read my tasks','Remind me tonight…'],notes:['Read my notes','Add another note…'],web_search:['Summarize that shorter','Save this as a note'],device_status:['Open battery settings','Turn on the flashlight'],analyze_screen:['Explain in more detail','Save this as a note'],read_screen:['Summarize this screen','Save this as a note'],files:['Read that file','Search another folder…'],read_document:['List the key points','Summarize in 3 lines'],compose_email:['Make it shorter','Make it more formal'],device_control:['Undo that']};
+function suggest(used){
+  const L=[];[...used].forEach(n=>(SUG[n]||[]).forEach(x=>{if(!L.includes(x))L.push(x)}));
+  if(!L.length)L.push('Tell me more','Explain it simply');
+  const box=$('sugg');box.textContent='';
+  L.slice(0,3).forEach(p=>box.appendChild(mkChip(p.replace(/…$/,''),()=>runChip(p))));
+}
+
+function setPrev(title,text,img){
+  const p=$('prev');p.textContent='';
+  const h=document.createElement('div');h.className='ph';const t=document.createElement('b');t.textContent=title;const x=document.createElement('span');x.textContent='✕';x.onclick=e=>{e.stopPropagation();p.className=''};h.append(t,x);p.appendChild(h);
+  if(img){const im=document.createElement('img');im.src='data:image/jpeg;base64,'+img;p.appendChild(im)}
+  if(text){const d=document.createElement('div');d.className='pt';d.textContent=text;p.appendChild(d)}
+  p.className='on';p.onclick=()=>p.classList.toggle('open');
+}
+async function search(q){const r=await searchRaw(q);try{setPrev('🌐 '+q.slice(0,48),r.replace(/^Answer:\s*/,'').slice(0,700))}catch(e){}return r}
+
+let searchOn=false,vol=50;
+$('sb').onclick=()=>{searchOn=!searchOn;$('sb').classList.toggle('on',searchOn);$('txt').placeholder=searchOn?'Search the web…':'Ketik perintah untuk J.A.R.V.I.S....';$('txt').focus()};
+
+const DEVROWS=[['🔦 Flashlight','flashlight'],['📶 Wi‑Fi','wifi'],['🔵 Bluetooth','bluetooth'],['✈ Airplane mode','airplane_mode'],['📍 Location','location']];
+const DEVACT=[['🔒 Lock','lock_screen'],['📸 Screenshot','screenshot'],['🔔 Notifications','notifications'],['⚙ Quick settings','quick_settings'],['🏠 Home','home'],['↩ Back','back']];
+async function devRun(name,args){$('dp').classList.remove('show');archive();$('me').textContent='🎛 '+(args.setting||args.action);say('…');const r=await runTool(name,args);say(String(r));await flushQ()}
+function devBtn(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;return b}
+function buildDev(){
+  const L=$('dl');L.textContent='';
+  DEVROWS.forEach(([lab,key])=>{const r=document.createElement('div');r.className='dr';const s=document.createElement('span');s.textContent=lab;r.appendChild(s);['on','off'].forEach(st=>r.appendChild(devBtn(st.toUpperCase(),()=>devRun('device_control',{setting:key,state:st}))));L.appendChild(r)});
+  const v=document.createElement('div');v.className='dr';const vs=document.createElement('span');vs.textContent='🔊 Volume';v.appendChild(vs);
+  [['−',-10],['+',10]].forEach(([l,d])=>v.appendChild(devBtn(l,()=>{vol=Math.max(0,Math.min(100,vol+d));devRun('device_control',{setting:'volume',percent:vol})})));L.appendChild(v);
+  const g=document.createElement('div');g.className='dg';DEVACT.forEach(([lab,act])=>g.appendChild(devBtn(lab,()=>devRun('ui_control',{action:act}))));L.appendChild(g);
+}
+$('dv').onclick=()=>{buildDev();$('dp').classList.add('show')};$('dx').onclick=()=>$('dp').classList.remove('show');
+$('fs').oninput=e=>document.documentElement.style.setProperty('--fs',e.target.value+'px');
+refreshCtx();
+function sendTxt(){const v=$('txt').value.trim();if(!v||mode!=='idle')return;if(!cfg.ak||!cfg.fk)return openCfg();audio();$('txt').value='';syncMic();ask(v)}
+function syncMic(){const s=!!$('txt').value.trim();$('mic').classList.toggle('send',s);$('mic').textContent=s?'➤':'🎙'}
+$('txt').addEventListener('input',syncMic);
+$('txt').addEventListener('keydown',e=>{if(e.key==='Enter')sendTxt()});
+$('mic').onclick=()=>{if($('txt').value.trim())sendTxt();else micToggle()};
+$('core').onclick=()=>micToggle();
+$('plus').onclick=()=>$('sheet').classList.add('show');
+$('sheet').addEventListener('click',e=>{if(e.target.id==='sheet'||e.target.closest('#sh button'))setTimeout(()=>$('sheet').classList.remove('show'),0)});
+if(window.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--dock-h',(innerHeight-$('dock').getBoundingClientRect().top+10)+'px')).observe($('dock'));
+/* ---------- plugins: skills (SKILL.md) + MCP connectors (with OAuth sign-in) ---------- */
+const REDIR='com.stark.jarvis://oauth';
+const PRESETS={figma:'https://mcp.figma.com/mcp',canva:'https://mcp.canva.com/mcp',notion:'https://mcp.notion.com/mcp',linear:'https://mcp.linear.app/mcp',github:'https://api.githubcopilot.com/mcp/'};
+const ALIASES={superpowers:'obra/superpowers','find-skills':'vercel-labs/skills#find-skills',findskills:'vercel-labs/skills#find-skills',omniroute:'diegosouzapw/OmniRoute#omniroute'};
+const skills=()=>J('jsk')||[],conns=()=>J('jmc')||[];
+const saveS=L=>localStorage.setItem('jsk',JSON.stringify(L)),saveC=L=>localStorage.setItem('jmc',JSON.stringify(L));
+const upd=c=>{const L=conns().filter(x=>x.id!==c.id);L.push(c);saveC(L)};
+const skillLine=()=>skills().length?' SKILLS installed (when a task matches one, call use_skill with the exact name first and follow it): '+skills().slice(0,40).map(s=>s.name+' - '+s.desc.slice(0,150)).join(' | ')+'.':'';
+
+async function getText(u){const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status+' for '+u);return await r.text()}
+async function getJson(u,h){try{const r=await fetch(u,{headers:h||{}});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+function parseSkill(md,fb){
+  let name=fb,desc='',body=md;const m=md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
+  if(m){
+    body=m[2];const fm=m[1];
+    const g=k=>{const x=fm.match(new RegExp('^'+k+':[ \\t]*(.*)$','mi'));if(!x)return '';let v=x[1].trim();
+      if(/^[>|][+-]?$/.test(v)){const rest=fm.slice(fm.indexOf(x[0])+x[0].length).split('\n').slice(1),out=[];for(const l of rest){if(/^\s+\S/.test(l))out.push(l.trim());else break}v=out.join(' ')}
+      return v.replace(/^["']|["']$/g,'')};
+    name=g('name')||fb;desc=g('description');
+  }
+  return {name:String(name).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48),desc:desc.slice(0,300),body:body.trim().slice(0,20000)};
+}
+function saveSkill(s,src){if(!s.name||!s.body)return false;const L=skills().filter(x=>x.name!==s.name);L.push(Object.assign({},s,{src}));saveS(L);return true}
+async function installSkill(src){
+  src=(ALIASES[src.trim().toLowerCase()]||src).trim();
+  if(/^https?:\/\/\S+\.md(\?\S*)?$/i.test(src)){
+    const u=src.replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/,'https://raw.githubusercontent.com/$1/$2/$3');
+    const s=parseSkill(await getText(u),u.split('/').slice(-2,-1)[0]||'skill');return saveSkill(s,src)?[s.name]:[];
+  }
+  const m=src.replace(/^https?:\/\/github\.com\//,'').match(/^([^/#\s]+)\/([^/#\s]+?)(?:\.git)?(?:\/tree\/[^#]*)?(?:#(.+))?$/);
+  if(!m)throw new Error('Use owner/repo, a GitHub link, or a link to a SKILL.md file.');
+  const o=m[1],rp=m[2],flt=m[3];
+  const tr=await getJson('https://api.github.com/repos/'+o+'/'+rp+'/git/trees/HEAD?recursive=1',{accept:'application/vnd.github+json'});
+  if(!tr||!tr.tree)throw new Error('Could not read github.com/'+o+'/'+rp+' (wrong name, or GitHub is rate limiting for a while).');
+  let ps=tr.tree.filter(x=>x.type==='blob'&&/(^|\/)SKILL\.md$/i.test(x.path)).map(x=>x.path);
+  if(flt)ps=ps.filter(p=>p.toLowerCase().includes(flt.toLowerCase()));
+  ps=ps.slice(0,30);const done=[];
+  for(const p of ps){try{const s=parseSkill(await getText('https://raw.githubusercontent.com/'+o+'/'+rp+'/HEAD/'+p),p.split('/').slice(-2,-1)[0]||rp);if(saveSkill(s,o+'/'+rp))done.push(s.name)}catch(e){}}
+  return done;
+}
+async function findSkills(q){
+  const j=await getJson('https://skills.sh/api/search?q='+encodeURIComponent(q));
+  if(j){const arr=Array.isArray(j)?j:(j.skills||j.results||j.data||[]);
+    if(arr.length)return arr.slice(0,10).map(x=>(x.name||x.id||x.title||'?')+((x.source||x.repo)?' - '+(x.source||x.repo):'')+(x.installs?' ('+x.installs+' installs)':'')+(x.description?': '+String(x.description).slice(0,90):'')).join('\n')+'\n(Install with the owner/repo shown.)'}
+  return await search('agent skill SKILL.md '+q+' github');
+}
+
+/* ----- MCP over HTTP ----- */
+const MCPMAP={};
+function jrpc(tx,ct,id){
+  if(/event-stream/i.test(ct)||/^\s*(event|data):/m.test(tx)){
+    let last=null;tx.split(/\r?\n/).forEach(l=>{if(l.startsWith('data:')){try{const j=JSON.parse(l.slice(5).trim());if(j&&(j.id===id||last===null))last=j}catch(e){}}});
+    if(!last)throw new Error('empty reply from the MCP server');if(last.error)throw new Error(last.error.message||'MCP error');return last.result;
+  }
+  const j=JSON.parse(tx);if(j.error)throw new Error(j.error.message||'MCP error');return j.result;
+}
+async function postForm(u,o){
+  const r=await fetch(u,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded',accept:'application/json'},body:new URLSearchParams(o).toString()});
+  let j={};try{j=await r.json()}catch(e){}if(!r.ok&&!j.error)j.error='HTTP '+r.status;return j;
+}
+async function mcpTok(c){
+  if(c.token)return c.token;const a=c.auth;if(!a||!a.at)return '';
+  if(a.exp&&Date.now()>a.exp-60000&&a.rt&&a.as){
+    const r=await postForm(a.as.token_endpoint,{grant_type:'refresh_token',refresh_token:a.rt,client_id:a.cid,resource:c.url});
+    if(r.access_token){a.at=r.access_token;if(r.refresh_token)a.rt=r.refresh_token;a.exp=r.expires_in?Date.now()+r.expires_in*1000:0;upd(c)}
+  }
+  return a.at;
+}
+async function mcpPost(c,body,note){
+  const h={'content-type':'application/json',accept:'application/json, text/event-stream'};
+  if(c.sess)h['mcp-session-id']=c.sess;if(c.proto)h['mcp-protocol-version']=c.proto;
+  const tk=await mcpTok(c);if(tk)h.authorization='Bearer '+tk;
+  const r=await fetch(c.url,{method:'POST',headers:h,body:JSON.stringify(body)});
+  if(r.status===401){const e=new Error('sign-in required');e.auth=true;e.www=(r.headers&&r.headers.get&&r.headers.get('www-authenticate'))||'';throw e}
+  if(!r.ok){let t='';try{t=(await r.text()).slice(0,120)}catch(e){}throw new Error('MCP server answered HTTP '+r.status+' '+t)}
+  const sid=r.headers&&r.headers.get&&r.headers.get('mcp-session-id');if(sid)c.sess=sid;
+  if(note)return null;
+  return jrpc(await r.text(),(r.headers&&r.headers.get&&r.headers.get('content-type'))||'',body.id);
+}
+async function mcpInit(c){
+  c.sess='';const r=await mcpPost(c,{jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Jarvis',version:'1.0'}}});
+  c.proto=(r&&r.protocolVersion)||'2025-06-18';try{await mcpPost(c,{jsonrpc:'2.0',method:'notifications/initialized'},true)}catch(e){}
+}
+async function mcpTools(c){
+  let L=[],cur;
+  for(let i=0;i<6;i++){const r=await mcpPost(c,{jsonrpc:'2.0',id:10+i,method:'tools/list',params:cur?{cursor:cur}:{}});L=L.concat(r.tools||[]);cur=r.nextCursor;if(!cur)break}
+  c.tools=L.map(t=>({name:t.name,description:(t.description||'').slice(0,300),schema:t.inputSchema||{type:'object',properties:{}}}));upd(c);return c.tools.length;
+}
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const rnd=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return b64u(a)};
+async function oauthBegin(c,www){
+  const u=new URL(c.url),rm=(www.match(/resource_metadata="([^"]+)"/)||[])[1];
+  const prm=await getJson(rm||(u.origin+'/.well-known/oauth-protected-resource'+(u.pathname!=='/'?u.pathname:'')))||await getJson(u.origin+'/.well-known/oauth-protected-resource')||{};
+  const asu=((prm.authorization_servers||[])[0]||u.origin).replace(/\/$/,'');
+  const meta=await getJson(asu+'/.well-known/oauth-authorization-server')||await getJson(asu+'/.well-known/openid-configuration');
+  if(!meta||!meta.authorization_endpoint||!meta.token_endpoint)throw new Error('Could not find this service’s sign-in settings.');
+  let cid=c.auth&&c.auth.cid;
+  if(!cid){
+    if(!meta.registration_endpoint)throw new Error('This service requires a pre-registered app and does not let Jarvis sign in automatically.');
+    const rr=await fetch(meta.registration_endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({client_name:'Jarvis',redirect_uris:[REDIR],grant_types:['authorization_code','refresh_token'],response_types:['code'],token_endpoint_auth_method:'none'})});
+    let rj={};try{rj=await rr.json()}catch(e){}
+    if(!rj.client_id)throw new Error('The service did not accept Jarvis as an app ('+(rj.error_description||rj.error||('HTTP '+rr.status))+').');
+    cid=rj.client_id;
+  }
+  const ver=rnd(48),st=rnd(16),ch=b64u(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(ver)));
+  c.auth={cid,as:{authorization_endpoint:meta.authorization_endpoint,token_endpoint:meta.token_endpoint},ver,st};upd(c);
+  const q=new URLSearchParams({response_type:'code',client_id:cid,redirect_uri:REDIR,code_challenge:ch,code_challenge_method:'S256',state:st,resource:c.url});
+  if(prm.scopes_supported&&prm.scopes_supported.length)q.set('scope',prm.scopes_supported.join(' '));
+  const n=NB();if(!n)throw new Error('Signing in needs the installed app.');
+  await n.openUrl({url:meta.authorization_endpoint+(meta.authorization_endpoint.includes('?')?'&':'?')+q.toString()});
+  return 'Opening the sign-in page. Approve access there, then you will come back to Jarvis.';
+}
+async function oauthDone(url){
+  let q;try{q=new URL(url).searchParams}catch(e){return}
+  const code=q.get('code'),st=q.get('state'),err=q.get('error');
+  const c=conns().find(x=>x.auth&&x.auth.st&&x.auth.st===st);if(!c)return;
+  if(err||!code){say('Sign-in was cancelled'+(err?': '+err:'')+'.');return}
+  const a=c.auth,r=await postForm(a.as.token_endpoint,{grant_type:'authorization_code',code,redirect_uri:REDIR,client_id:a.cid,code_verifier:a.ver,resource:c.url});
+  if(!r.access_token){say('Sign-in failed: '+(r.error_description||r.error||'no token')+'.');return}
+  a.at=r.access_token;a.rt=r.refresh_token||'';a.exp=r.expires_in?Date.now()+r.expires_in*1000:0;a.st='';a.ver='';upd(c);
+  try{await mcpInit(c);const k=await mcpTools(c);say(c.name+' connected, '+k+' tools ready.')}catch(e){say(c.name+': '+e.message)}
+  if($('pp').classList.contains('show'))renderPlug();
+}
+async function connect(c){
+  try{await mcpInit(c);const k=await mcpTools(c);return c.name+' connected: '+k+' tools ready.'}
+  catch(e){if(e.auth)return await oauthBegin(c,e.www);throw e}
+}
+function mcpDefs(text,prev){
+  Object.keys(MCPMAP).forEach(k=>delete MCPMAP[k]);const defs=[];
+  for(const c of conns()){
+    if(!c.tools||!c.tools.length)continue;
+    const all=c.tools.map(t=>({nm:(c.id+'_'+t.name).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,64),t}));
+    all.forEach(x=>{MCPMAP[x.nm]={c:c.id,t:x.t.name}});
+    const kw=c.name.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(/\s+/).filter(Boolean).join('|');
+    if(!(kw&&new RegExp('\\b('+kw+')\\b','i').test(text))&&!all.some(x=>prev.includes(x.nm)))continue;
+    const words=text.toLowerCase().split(/\W+/).filter(w=>w.length>3);
+    all.map(x=>({x,s:words.filter(w=>(x.t.name+' '+x.t.description).toLowerCase().includes(w)).length})).sort((a,b)=>b.s-a.s).slice(0,30).forEach(({x})=>{
+      const sc=JSON.parse(JSON.stringify(x.t.schema||{}));delete sc.$schema;if(!sc.type)sc.type='object';if(!sc.properties)sc.properties={};
+      defs.push({type:'function',function:{name:x.nm,description:('['+c.name+'] '+x.t.description).slice(0,300),parameters:sc}});
+    });
+  }
+  return defs;
+}
+async function mcpRun(nm,a){
+  const m=MCPMAP[nm],c=m&&conns().find(x=>x.id===m.c);if(!c)return 'That connector tool is no longer available.';
+  const call=()=>mcpPost(c,{jsonrpc:'2.0',id:Date.now()%1000000000,method:'tools/call',params:{name:m.t,arguments:a||{}}});
+  let r;
+  try{r=await call()}catch(e){
+    if(e.auth)return c.name+' needs you to sign in again. Say "connect '+c.name+'".';
+    if(/HTTP 404/.test(e.message)){try{await mcpInit(c);r=await call()}catch(e2){return 'Failed: '+e2.message}}else return 'Failed: '+e.message;
+  }
+  upd(c);
+  const txt=(r.content||[]).map(x=>x.type==='text'?x.text:x.type==='image'?'[image]':x.type==='resource'?((x.resource&&x.resource.text)||'[resource]'):'').filter(Boolean).join('\n');
+  return (r.isError?'The tool reported an error: ':'')+(txt||JSON.stringify(r.structuredContent||r)).slice(0,3500);
+}
+const MORE3=[
+ fn('connectors','Plugins that connect Jarvis to outside apps (MCP servers): add (name, optional url or a known name: figma, canva, notion, linear, github; optional token), list, connect (sign in or refresh tools), remove.',{action:{type:'string',enum:['add','list','connect','remove']},name:S,url:S,token:S},['action']),
+ fn('skills','Skills are installable instruction packs (SKILL.md): install (source: owner/repo, GitHub link, SKILL.md link, or a known name such as superpowers, find-skills, omniroute), find (query), list, remove (name).',{action:{type:'string',enum:['install','find','list','remove']},source:S,query:S,name:S},['action']),
+ fn('use_skill','Load the full instructions of an installed skill, then follow them.',{name:S},['name'])
+];
+async function runPlug(name,a){
+  if(MCPMAP[name])return await mcpRun(name,a);
+  if(name==='use_skill'){const s=skills().find(x=>x.name===String(a.name||'').toLowerCase());return s?s.body:'No such skill. Installed: '+(skills().map(x=>x.name).join(', ')||'none')}
+  if(name==='skills'){
+    if(a.action==='list')return skills().length?skills().map(s=>s.name+' - '+s.desc.slice(0,100)).join('\n'):'No skills installed yet.';
+    if(a.action==='find')return await findSkills(a.query||a.source||'');
+    if(a.action==='remove'){const L=skills(),k=String(a.name||'').toLowerCase();saveS(L.filter(x=>x.name!==k));return 'Removed.'}
+    try{const d=await installSkill(a.source||a.name||'');return d.length?'Installed '+d.length+' skill(s): '+d.slice(0,12).join(', ')+(d.length>12?'…':''):'No skill files found there.'}catch(e){return 'Install failed: '+e.message}
+  }
+  if(name==='connectors'){
+    const L=conns(),nm=(a.name||'').trim(),key=nm.toLowerCase();
+    if(a.action==='list')return L.length?L.map(c=>c.name+': '+(c.tools&&c.tools.length?c.tools.length+' tools ready':'not connected yet')).join('\n'):'No connectors yet. Known services: '+Object.keys(PRESETS).join(', ')+'.';
+    if(a.action==='add'){
+      const url=(a.url||PRESETS[key]||'').trim();if(!/^https:\/\//.test(url))return 'I need an https MCP server URL, or one of these names: '+Object.keys(PRESETS).join(', ')+'.';
+      const c={id:(key.replace(/[^a-z0-9]/g,'')||('c'+Date.now()%1000000)),name:nm||url,url,token:(a.token||'').trim(),tools:[]};upd(c);
+      try{return await connect(c)}catch(e){return c.name+' was added, but: '+e.message}
+    }
+    const c=L.find(x=>x.name.toLowerCase()===key||x.id===key);if(!c)return 'There is no connector called '+nm+'.';
+    if(a.action==='remove'){saveC(L.filter(x=>x.id!==c.id));return 'Removed '+c.name+'.'}
+    try{return await connect(c)}catch(e){return c.name+': '+e.message}
+  }
+  return undefined;
+}
+
+/* ----- plugin panel ----- */
+function el(t,txt,cls,fn){const e=document.createElement(t);if(txt)e.textContent=txt;if(cls)e.className=cls;if(fn)e.onclick=fn;return e}
+function renderPlug(msg){
+  const box=$('pl2');box.textContent='';
+  const sec=t=>box.appendChild(el('div',t,'slabel'));
+  const note=t=>{const d=el('div',t,'pnote');box.appendChild(d);return d};
+  sec('CONNECTORS (MCP)');
+  const cs=conns();if(!cs.length)note('No connectors yet. Pick one below.');
+  cs.forEach(c=>{const row=el('div','','dr');row.appendChild(el('span',c.name+(c.tools&&c.tools.length?'  ✔ '+c.tools.length+' tools':'  · sign-in needed')));
+    row.appendChild(el('button','CONNECT','',async()=>{st.textContent='Working…';try{st.textContent=await connect(c)}catch(e){st.textContent=e.message}renderPlug(st.textContent)}));
+    row.appendChild(el('button','✕','',()=>{saveC(conns().filter(x=>x.id!==c.id));renderPlug()}));box.appendChild(row)});
+  const chips=el('div','','pchips');Object.keys(PRESETS).forEach(k=>chips.appendChild(el('button',k,'chip',()=>{nm.value=k;ur.value=PRESETS[k]})));box.appendChild(chips);
+  const nm=el('input');nm.placeholder='Name (e.g. Figma)';const ur=el('input');ur.placeholder='MCP server URL (https://…)';const tk=el('input');tk.placeholder='Access token (only if the service needs one)';tk.type='password';
+  [nm,ur,tk].forEach(x=>{x.className='pin';box.appendChild(x)});
+  box.appendChild(el('button','ADD & CONNECT','',async()=>{st.textContent='Working…';st.textContent=await runPlug('connectors',{action:'add',name:nm.value,url:ur.value,token:tk.value});renderPlug(st.textContent)}));
+  sec('SKILLS (SKILL.md)');
+  const ss=skills();if(!ss.length)note('No skills yet. Install a pack below.');
+  ss.forEach(s=>{const row=el('div','','dr');row.appendChild(el('span',s.name));row.appendChild(el('button','✕','',()=>{saveS(skills().filter(x=>x.name!==s.name));renderPlug()}));box.appendChild(row)});
+  const sc=el('div','','pchips');[['Superpowers','superpowers'],['Find Skills','find-skills'],['OmniRoute','omniroute']].forEach(([l,k])=>sc.appendChild(el('button',l,'chip',()=>{si.value=k})));box.appendChild(sc);
+  const si=el('input');si.placeholder='owner/repo, GitHub link, or SKILL.md link';si.className='pin';box.appendChild(si);
+  box.appendChild(el('button','INSTALL SKILLS','',async()=>{st.textContent='Installing…';st.textContent=await runPlug('skills',{action:'install',source:si.value});renderPlug(st.textContent)}));
+  const sq=el('input');sq.placeholder='Search skills (e.g. design, testing)';sq.className='pin';box.appendChild(sq);
+  box.appendChild(el('button','SEARCH SKILLS','',async()=>{st.textContent='Searching…';st.textContent=await runPlug('skills',{action:'find',query:sq.value});renderPlug(st.textContent)}));
+  const st=note(msg||'');st.id='pst';
+  note('Tip: OmniRoute (an AI gateway) can also be used as an AI model: add it under Backup AI models in Settings with its /v1 address.');
+}
+$('pl').onclick=()=>{renderPlug();$('pp').classList.add('show')};$('px2').onclick=()=>$('pp').classList.remove('show');
+async function ask(text){
+  Q.length=0;turn++;
+  archive();const shown=text;lastUserText=shown;if(searchOn){text='Search the web first and answer: '+text;searchOn=false;$('sb').classList.remove('on');$('txt').placeholder='Ketik perintah untuk J.A.R.V.I.S....'}
+  $('me').textContent=shown;hist.push({role:'user',content:text});saveH();logH('u',text);setMode('thinking');say('…');
+  try{
+    if(!navigator.onLine){await finishLocal((await offline(text))||'I am offline, sir. Only local commands work: flashlight, volume, timers, notes, battery and the time.');return}
+    await refreshCtx();
+    let out,via='';
+    const sys=sysFull()+' Your built-in knowledge is outdated and incomplete. For ANY question about movies, TV, games, tech, products, people, sports, news, prices, release dates or whether something is released, delayed or cancelled, you MUST call web_search first and trust the results over your memory; mention dates. Use tools for phone settings, device_capabilities, shizuku_status, shizuku_request_access, volume_status, Spotify, calendar, reminders, WhatsApp, notes, tasks, weather, email, clipboard, notifications, smart home and screen questions. For app UI automation, inspect the visible screen or UI tree first, use exact visible labels when possible, use coordinate taps only when the coordinates came from the current screen tree, never guess coordinates, and verify important actions afterward. If an action fails, inspect the screen again and adapt once rather than repeating blindly. Do not claim success unless the tool confirms it. Never type into password fields. Always use calculate for arithmetic. For a briefing, combine weather, device_status, tasks and notes into a short summary. For translations give only the translation. For multi-step goals, plan, chain tools until finished, then report briefly. Before irreversible or sensitive actions (sending messages or email, deleting files, purchases) ask the user to confirm and wait for their reply. Use delegate for complex research, coding, writing or planning sub-tasks. Never identify real people from their faces. After acting, say only the useful outcome in a few words (what is playing, when the alarm rings, what was opened), phrased differently each time, with no filler. Tool results are for you: never read them out verbatim. Never clear notes unless explicitly told to.';
+    const base=pickTools(text);const tools=/whats?app|\bwa\b/i.test(text)?[...base,WA]:base;const used=new Set();
+    const hs=hist.slice(-12);while(hs.length&&hs[0].role!=='user')hs.shift();
+    const msgs=[{role:'system',content:sys},...hs];
+    for(let i=0;i<10&&!out;i++){
+      const r=await chat(msgs,{tools,max:600});via=r.p.n;
+      if(r.tool_calls.length){
+        msgs.push(Object.assign({role:'assistant',content:r.content||'',tool_calls:r.tool_calls},r.reasoning?{reasoning_content:r.reasoning}:{}));
+        for(const c of r.tool_calls){let a={};try{a=JSON.parse(c.function.arguments||'{}')}catch(e){}
+          say('Running '+c.function.name+'…');used.add(c.function.name);
+          msgs.push({role:'tool',tool_call_id:c.id,content:String(await runTool(c.function.name,a))})}
+      }else out=r.content;
+    }
+    prevTools=[...used];
+    if(!out){const F=['At once, sir.','Right away.','Handled.','On it.'];out=F[Math.floor(Math.random()*F.length)]}
+    if(providers().length>1)$('me').textContent=shown+'  ·  via '+via;
+    hist.push({role:'assistant',content:out});saveH();logH('a',out);condense();say(out);suggest(used);await speak(out);await flushQ();
+  }catch(e){
+    if(/fetch|network|load failed|timeout|connect/i.test(String(e.message))){const o=await offline(text).catch(()=>null);if(o){await finishLocal(o);return}}
+    say('Error: '+e.message);setMode('idle')}
+}
+
+/* ---------- voice out (Fish Audio) ---------- */
+async function ttsBytes(body){
+  const url='https://api.fish.audio/v1/tts',headers={'Authorization':'Bearer '+cfg.fk,'Content-Type':'application/json','model':cfg.fm||'s1'};
+  const H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp;
+  if(H){ // native HTTP returns binary as base64 (the patched fetch corrupts audio)
+    const r=await H.request({url,method:'POST',headers,data:body,responseType:'arraybuffer'});
+    if(r.status>=300)throw new Error('Fish Audio '+r.status);
+    if(typeof r.data!=='string')throw new Error('Fish Audio returned no audio');
+    const bin=atob(r.data),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;
+  }
+  const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('Fish Audio '+r.status);
+  return r.arrayBuffer();
+}
+async function speak(text){
+  audio();
+  const spoken=text.replace(/```[\s\S]*?```/g,' The code is in the text card. ').replace(/\s+/g,' ').trim();
+  if(/```/.test(text))setPrev('📄 Teks lengkap',text);
+  buildCap(spoken);
+  try{
+    const body={text:spoken,format:'mp3',latency:'balanced'};if(cfg.vid)body.reference_id=cfg.vid;
+    const ab=await ctx.decodeAudioData(await ttsBytes(body));
+    playSrc=ctx.createBufferSource();playSrc.buffer=ab;playSrc.connect(an);an.connect(ctx.destination);
+    setMode('speaking');
+    await new Promise(res=>{playSrc.onended=res;playSrc.start();kStart(ab.duration,()=>ctx.currentTime)});
+  }catch(e){if(!$('prev').classList.contains('on'))setPrev('⚠ Suara',e.message+' — memakai suara HP');await localSpeak(spoken)}
+  kStop();try{an.disconnect()}catch(e){}playSrc=null;setMode('idle');if(hf&&!Q.length)setTimeout(()=>{if(mode==='idle')startRec()},350);
+}
+
+/* ---------- voice in ---------- */
+function toWav(ab){const d=ab.getChannelData(0),sr=ab.sampleRate,o=new DataView(new ArrayBuffer(44+d.length*2));
+  const w=(p,s)=>{for(let i=0;i<s.length;i++)o.setUint8(p+i,s.charCodeAt(i))};
+  w(0,'RIFF');o.setUint32(4,36+d.length*2,true);w(8,'WAVEfmt ');o.setUint32(16,16,true);o.setUint16(20,1,true);o.setUint16(22,1,true);o.setUint32(24,sr,true);o.setUint32(28,sr*2,true);o.setUint16(32,2,true);o.setUint16(34,16,true);w(36,'data');o.setUint32(40,d.length*2,true);
+  for(let i=0;i<d.length;i++){const s=Math.max(-1,Math.min(1,d[i]));o.setInt16(44+i*2,s<0?s*32768:s*32767,true)}
+  return new Blob([o],{type:'audio/wav'})}
+async function startRec(){
+  audio();
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){say('Microphone unavailable: '+e.message);return}
+  micSrc=ctx.createMediaStreamSource(stream);micSrc.connect(an);
+  chunks=[];rec=new MediaRecorder(stream);rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=async()=>{
+    try{micSrc.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());if(cancel){cancel=0;setMode('idle');say('Standing by, sir.');return}setMode('thinking');say('…');
+    try{
+      const ab=await ctx.decodeAudioData(await new Blob(chunks).arrayBuffer());
+      const fd=new FormData();fd.append('audio',toWav(ab),'speech.wav');fd.append('ignore_timestamps','true');
+      const r=await fetch('https://api.fish.audio/v1/asr',{method:'POST',headers:{'Authorization':'Bearer '+cfg.fk},body:fd});
+      if(!r.ok)throw new Error('ASR '+r.status);
+      const t=((await r.json()).text||'').trim();
+      if(!t){say('I didn’t catch that, sir.');setMode('idle');return}
+      ask(t);
+    }catch(e){say('Transcription failed: '+e.message+'. You can type instead.');setMode('idle')}
+  };
+  heard=0;recStart=lastLoud=performance.now();rec.start();archive();setMode('listening');say('Listening…');
+}
+function stopRec(){if(rec&&rec.state!=='inactive')rec.stop()}
+function micToggle(){
+  if(!cfg.ak||!cfg.fk)return openCfg();
+  if(mode==='idle')startRec();else if(mode==='listening')stopRec();else if(mode==='speaking'&&playSrc)playSrc.stop();
+}
+
+/* ---------- visual: particle ring ---------- */
+/* ---------- holographic core engine (design: JARVIS Holographic Core) ---------- */
+const cv=$('cv'),g=cv.getContext('2d');let W,H,dpr,parts=[];
+const spr=document.createElement('canvas');spr.width=spr.height=32;
+(()=>{const c=spr.getContext('2d'),gr=c.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(200,253,255,1)');gr.addColorStop(.25,'rgba(116,239,255,.75)');gr.addColorStop(1,'rgba(0,223,255,0)');c.fillStyle=gr;c.fillRect(0,0,32,32)})();
+function mkParts(){const n=document.documentElement.classList.contains('lite')?40:Math.min(90,Math.floor(W*H/9500));parts=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.4,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.28,a:Math.random()*.65+.15,p:Math.random()*6.2832}))}
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);mkParts()}
+addEventListener('resize',size);size();
+
+const LAY=[...document.querySelectorAll('.holo-layer')].map((el,i)=>({el,bz:+el.dataset.baseZ||0,za:+el.dataset.zAmp||0,sa:+el.dataset.scaleAmp||0,ph:i*1.3}));
+const asm=$('core'),beam=$('beam'),flash=$('flash'),ctr=$('ctr');
+let ANIMS=[];const getAnims=()=>{try{ANIMS=document.getAnimations().filter(a=>/^rotate/.test(a.animationName||''))}catch(e){ANIMS=[]}};
+setTimeout(getAnims,400);setTimeout(getAnims,2500);
+
+/* word-by-word caption: every spoken word kicks the core */
+const KJ={on:false,spans:[],cum:[],starts:[],tot:1,t0:0,dur:1,i:-1,clk:()=>0};
+let lvl=0,t=0,last=performance.now(),kick=0,rate=1,lastRate=1,E=0,fakeVoice=false;
+function buildCap(text){
+  const c=$('ai');c.textContent='';c.scrollTop=0;KJ.on=false;KJ.spans=[];KJ.starts=[];KJ.i=-1;
+  const re=/\S+/g;let m;
+  while((m=re.exec(text))){const s=document.createElement('span');s.className='w';s.textContent=m[0]+' ';c.appendChild(s);KJ.spans.push(s);KJ.starts.push(m.index)}
+  let a=0;KJ.cum=KJ.spans.map(s=>{const w=s.textContent.trim();a+=w.length+(/[.,!?;:]$/.test(w)?4:0)+1;return a});KJ.tot=a||1;
+}
+function kStart(dur,clk){KJ.on=true;KJ.dur=Math.max(.3,dur);KJ.clk=clk;KJ.t0=clk();KJ.i=-1}
+function kSet(i){
+  if(i===KJ.i||i<0||i>=KJ.spans.length)return;KJ.i=i;
+  KJ.spans.forEach((s,j)=>{s.classList.toggle('done',j<i);s.classList.toggle('cur',j===i)});
+  kick=1;const c=$('ai'),s=KJ.spans[i];c.scrollTop=Math.max(0,s.offsetTop-c.clientHeight/2);
+}
+function kTick(){if(!KJ.on)return;const p=Math.max(0,Math.min(1,(KJ.clk()-KJ.t0)/KJ.dur))*KJ.tot;let i=0;while(i<KJ.cum.length-1&&KJ.cum[i]<=p)i++;kSet(i)}
+function kStop(){KJ.on=false;KJ.spans.forEach(s=>{s.classList.remove('cur');s.classList.add('done')})}
+
+function frame(now){
+  const dt=Math.min((now-last)/1000,.05);last=now;t+=dt;
+  let tl=0;
+  if(an&&(mode==='listening'||mode==='speaking')&&!fakeVoice){tl=Math.min(1,rms()*(mode==='listening'?5:3.2))}
+  else if(mode==='speaking'&&fakeVoice)tl=KJ.on?.3+.3*Math.abs(Math.sin(t*8.3)):.1;
+  else if(mode==='thinking')tl=.18+.12*Math.sin(t*5);
+  lvl+=(tl-lvl)*(tl>lvl?.35:.08);
+  if(mode==='listening'){const n=performance.now();if(tl>.12){heard=1;lastLoud=n}if(!heard&&n-recStart>8000){cancel=1;hf=false;hfSync();stopRec()}else if((heard&&n-lastLoud>1400)||n-recStart>25000)stopRec()}
+  kTick();
+  kick*=Math.exp(-7*dt);
+  E=Math.min(1,lvl*1.15+kick*.3);
+  const base={idle:1,listening:1.5,thinking:2.4,speaking:1.3}[mode]||1;
+  rate+=(base+E*3.2-rate)*Math.min(1,dt*6);
+  if(Math.abs(rate-lastRate)>.02){lastRate=rate;for(const a of ANIMS){try{a.playbackRate=rate}catch(e){}}}
+  for(const L of LAY){
+    const z=L.bz+L.za*E*Math.sin(t*2.2+L.ph),s=1+L.sa*E*(.7+.3*Math.sin(t*3+L.ph))+.006*Math.sin(t*.9+L.ph);
+    L.el.style.transform='translateZ('+z.toFixed(1)+'px) scale('+s.toFixed(4)+')';
+  }
+  asm.style.transform='rotateX('+(Math.sin(t*.5)*2.2+E*Math.sin(t*6.5)*2.5).toFixed(2)+'deg) rotateY('+(Math.cos(t*.37)*3.2+E*Math.sin(t*5.1)*3).toFixed(2)+'deg) scale('+(1+E*.05).toFixed(3)+')';
+  beam.style.opacity=(.5+E*.5).toFixed(3);flash.style.opacity=(E*.9).toFixed(3);ctr.style.transform='scale('+(1+E*.12).toFixed(3)+')';
+  g.clearRect(0,0,W,H);
+  const sp=1+E*3;
+  for(const p of parts){
+    p.x+=p.vx*sp;p.y+=p.vy*sp;p.p+=.018;
+    if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;if(p.y<-5)p.y=H+5;if(p.y>H+5)p.y=-5;
+    g.globalAlpha=p.a*(.65+.35*Math.sin(p.p));const d=p.r*6;g.drawImage(spr,p.x-d/2,p.y-d/2,d,d);
+  }
+  g.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>
