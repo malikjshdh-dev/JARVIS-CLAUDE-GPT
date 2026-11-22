@@ -1,3 +1,4 @@
+
 name: Build JARVIS APK
 
 on:
@@ -25,9 +26,12 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: false
 
       - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses || true
+        run: |
+          yes | sdkmanager --licenses
 
       - name: Build APK
         run: |
@@ -40,4 +44,4 @@ jobs:
           name: JARVIS-APK
           path: '**/*.apk'
           if-no-files-found: error
-
+          
